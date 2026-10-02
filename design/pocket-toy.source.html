@@ -1,0 +1,387 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fredoka:wght@400;500;600&family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap">
+<style>
+  #red-box-directions .rb-stage { min-height: 682px; padding: 28px 12px 24px; display: grid; place-items: center; }
+  #red-box-directions .rb-phone { color-scheme: light; --rb-paper: light-dark(#fff8ed, #302b29); --rb-ink: light-dark(#40342e, #fff0df); --rb-muted: light-dark(#806d5c, #d6c3b3); --rb-tile: light-dark(#f0e6d6, #51473f); --rb-floor: light-dark(#ddceba, #211e1b); --rb-red: #ed6258; --rb-red-floor: #c6413a; --rb-button-ink: #fffaf4; --rb-overlay: light-dark(#433b3166, #00000088); font-family: 'Nunito', sans-serif; color: var(--rb-ink); background: var(--rb-paper); width: min(100%, 338px); min-height: 622px; border-radius: 36px; padding: 25px 25px 24px; box-sizing: border-box; position: relative; box-shadow: 0 18px 52px #00000014; overflow: hidden; text-align: left; }
+  #red-box-directions .rb-phone *, #red-box-directions .rb-phone *::before, #red-box-directions .rb-phone *::after { box-sizing: border-box; }
+  #red-box-directions .rb-phone button { font: inherit; border: 0; -webkit-tap-highlight-color: transparent; }
+  #red-box-directions .rb-phone button:focus-visible { outline: 3px solid var(--rb-ink); outline-offset: 4px; }
+  #red-box-directions .rb-phone [hidden] { display: none !important; }
+  #red-box-directions .rb-top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; gap: 8px; }
+  #red-box-directions .rb-wordmark { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; letter-spacing: -.4px; }
+  #red-box-directions .rb-mini { width: 14px; height: 14px; border-radius: 4px; background: var(--rb-red); transform: rotate(-9deg); display: inline-block; }
+  #red-box-directions .rb-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; color: var(--rb-muted); background: transparent; }
+  #red-box-directions .rb-icon svg { width: 19px; height: 19px; }
+  #red-box-directions .rb-home { display: flex; flex-direction: column; min-height: 528px; }
+  #red-box-directions .rb-art { position: relative; height: 207px; display: grid; place-items: center; margin-top: 17px; }
+  #red-box-directions .rb-mascot { position: relative; width: 104px; height: 104px; background: var(--rb-red); border-radius: 23px; box-shadow: 0 8px 0 var(--rb-red-floor), 0 20px 24px #a4483126; transform: rotate(-9deg); }
+  #red-box-directions .rb-mascot::before { content: ''; position: absolute; left: 17px; top: 10px; width: 43px; height: 7px; border-radius: 8px; background: #fff8eb3b; transform: rotate(-4deg); }
+  #red-box-directions .rb-eyes { position: absolute; top: 42px; left: 32px; display: flex; gap: 23px; }
+  #red-box-directions .rb-eyes::before, #red-box-directions .rb-eyes::after { content: ''; width: 6px; height: 10px; background: #642e28; border-radius: 50%; }
+  #red-box-directions .rb-smile { position: absolute; top: 58px; left: 44px; height: 10px; width: 17px; border-radius: 0 0 16px 16px; border: 3px solid #642e28; border-top: 0; }
+  #red-box-directions .rb-cheek { position: absolute; top: 55px; left: 23px; width: 12px; height: 6px; border-radius: 50%; background: #ffb0a77a; box-shadow: 48px 0 0 #ffb0a77a; }
+  #red-box-directions .rb-float { position: absolute; width: 28px; height: 28px; background: var(--rb-tile); border-radius: 7px; box-shadow: 0 3px 0 var(--rb-floor); }
+  #red-box-directions .rb-float.a { left: 30px; top: 49px; transform: rotate(15deg); }
+  #red-box-directions .rb-float.b { right: 19px; bottom: 30px; transform: rotate(-14deg); width: 38px; height: 38px; }
+  #red-box-directions .rb-float.c { left: 53px; bottom: 22px; width: 17px; height: 17px; transform: rotate(-7deg); border-radius: 4px; }
+  #red-box-directions .rb-home-title { font-family: 'Fredoka', sans-serif; font-size: 48px; font-weight: 500; letter-spacing: -2px; line-height: 1.05; margin: 0; text-align: center; }
+  #red-box-directions .rb-home-caption { margin: 15px 0 0; text-align: center; font-size: 16px; font-weight: 600; line-height: 1.55; color: var(--rb-muted); }
+  #red-box-directions .rb-home-bottom { margin-top: auto; padding-top: 34px; }
+  #red-box-directions .rb-primary { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 55px; border-radius: 17px; background: var(--rb-red); color: var(--rb-button-ink); font-size: 17px; font-weight: 800; box-shadow: 0 4px 0 var(--rb-red-floor); padding: 13px 16px; }
+  #red-box-directions .rb-primary svg { width: 18px; height: 18px; }
+  #red-box-directions .rb-primary:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--rb-red-floor); }
+  #red-box-directions .rb-link { display: block; min-height: 44px; color: var(--rb-muted); background: transparent; font-size: 14px; font-weight: 700; text-align: center; margin: 15px auto 0; padding: 10px; }
+  #red-box-directions .rb-level { font-size: 13px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+  #red-box-directions .rb-game { min-height: 528px; display: flex; flex-direction: column; }
+  #red-box-directions .rb-instruction { padding-top: 36px; min-height: 132px; text-align: center; }
+  #red-box-directions .rb-title { margin: 0; font-family: 'Fredoka', sans-serif; font-size: 29px; font-weight: 500; letter-spacing: -.7px; line-height: 1.15; }
+  #red-box-directions .rb-subtitle { margin: 10px 0 0; font-size: 14px; font-weight: 600; line-height: 1.5; color: var(--rb-muted); }
+  #red-box-directions .rb-board-wrap { display: flex; align-items: center; justify-content: center; flex: 1; min-height: 269px; padding: 17px 10px 22px; }
+  #red-box-directions .rb-board { display: grid; grid-template-columns: repeat(var(--rb-cols, 2), minmax(0, 1fr)); gap: 16px; width: 246px; max-width: 100%; }
+  #red-box-directions .rb-tile { position: relative; appearance: none; aspect-ratio: 1; min-height: 48px; min-width: 48px; padding: 0; border-radius: var(--rb-radius, 18px); background: var(--rb-tile); box-shadow: 0 6px 0 var(--rb-floor), inset 0 2px 0 #ffffff36; transition: background-color 240ms ease, transform 180ms ease, box-shadow 240ms ease; }
+  #red-box-directions .rb-tile.red { background: var(--rb-red); box-shadow: 0 6px 0 var(--rb-red-floor), inset 0 2px 0 #ffffff36; }
+  #red-box-directions .rb-tile.preview-red { animation: rb-gentle-glow 3s ease-in-out 1; }
+  #red-box-directions .rb-tile.selected { transform: translateY(2px); }
+  #red-box-directions .rb-tile:disabled { opacity: 1; }
+  #red-box-directions .rb-tile:not(:disabled):active { transform: translateY(4px) scale(.97); }
+  #red-box-directions .rb-spacer { aspect-ratio: 1; }
+  #red-box-directions .rb-progress-area { padding-top: 10px; min-height: 76px; text-align: center; }
+  #red-box-directions .rb-progress { margin: 0; font-size: 14px; font-weight: 700; color: var(--rb-muted); }
+  #red-box-directions .rb-dots { display: flex; gap: 7px; justify-content: center; margin-bottom: 12px; }
+  #red-box-directions .rb-dot { width: 7px; height: 7px; background: var(--rb-floor); border-radius: 50%; }
+  #red-box-directions .rb-dot.filled { background: var(--rb-red); }
+  #red-box-directions .rb-game-footer { min-height: 69px; padding-top: 10px; display: grid; align-items: center; }
+  #red-box-directions .rb-footer-note { text-align: center; font-size: 12px; font-weight: 600; color: var(--rb-muted); }
+  #red-box-directions .rb-modal { position: absolute; inset: 0; z-index: 5; display: flex; align-items: flex-end; background: var(--rb-overlay); padding: 12px; }
+  #red-box-directions .rb-sheet { width: 100%; padding: 23px 20px 21px; background: var(--rb-paper); color: var(--rb-ink); border-radius: 27px; box-shadow: 0 5px 24px #0000001a; }
+  #red-box-directions .rb-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 13px; }
+  #red-box-directions .rb-sheet-title { font: 500 26px/1.15 'Fredoka', sans-serif; margin: 0; letter-spacing: -.4px; }
+  #red-box-directions .rb-sheet-copy { margin: 0 0 23px; font-size: 14px; line-height: 1.65; color: var(--rb-muted); }
+  #red-box-directions .rb-steps { display: grid; gap: 16px; margin: 2px 0 21px; }
+  #red-box-directions .rb-step { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; line-height: 1.55; }
+  #red-box-directions .rb-step-number { flex: 0 0 28px; height: 28px; display: grid; place-items: center; border-radius: 7px; background: var(--rb-tile); font-weight: 800; }
+  #red-box-directions .rb-step strong { display: block; font-weight: 800; }
+  #red-box-directions .rb-step p { margin: 1px 0 0; color: var(--rb-muted); }
+  #red-box-directions .rb-setting { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; font-size: 14px; font-weight: 700; }
+  #red-box-directions .rb-setting select { font: inherit; background: var(--rb-tile); color: var(--rb-ink); border: 0; border-radius: 9px; min-height: 44px; padding: 8px; }
+  #red-box-directions .rb-setting input { accent-color: var(--rb-red); width: 22px; height: 22px; margin: 0; }
+  #red-box-directions .rb-setting:has(input) { min-height: 52px; }
+  #red-box-directions .rb-secondary { background: var(--rb-tile); color: var(--rb-ink); box-shadow: none; margin-top: 12px; }
+  #red-box-directions .rb-paper { --rb-paper: light-dark(#f5f4ee, #282925); --rb-ink: light-dark(#29362e, #e7eee4); --rb-muted: light-dark(#667168, #b7c2b3); --rb-tile: light-dark(#e8e9df, #3d443a); --rb-floor: light-dark(#d3d8ca, #20261f); --rb-red: #cf5c48; --rb-red-floor: #ad4939; --rb-button-ink: light-dark(#f5f4ee, #253127); font-family: 'DM Sans', sans-serif; border-radius: 12px; padding: 25px 25px 24px; }
+  #red-box-directions .rb-paper .rb-wordmark { font-weight: 600; letter-spacing: -.6px; }
+  #red-box-directions .rb-paper .rb-mini { border-radius: 2px; transform: none; }
+  #red-box-directions .rb-paper .rb-home-title { font-family: 'DM Sans', sans-serif; text-align: left; font-size: 47px; font-weight: 500; letter-spacing: -2.7px; line-height: 1.06; margin-top: 42px; }
+  #red-box-directions .rb-paper .rb-home-caption { text-align: left; font-size: 15px; font-weight: 400; line-height: 1.65; margin-top: 17px; max-width: 225px; }
+  #red-box-directions .rb-paper .rb-art { margin: 12px 0 0; height: 175px; place-items: center end; padding-right: 20px; }
+  #red-box-directions .rb-paper .rb-mascot { width: 89px; height: 89px; border-radius: 5px; transform: rotate(8deg); box-shadow: none; }
+  #red-box-directions .rb-paper .rb-mascot::before, #red-box-directions .rb-paper .rb-cheek { display: none; }
+  #red-box-directions .rb-paper .rb-eyes { top: 37px; left: 26px; gap: 25px; }
+  #red-box-directions .rb-paper .rb-eyes::before, #red-box-directions .rb-paper .rb-eyes::after { width: 4px; height: 7px; }
+  #red-box-directions .rb-paper .rb-smile { top: 49px; left: 36px; height: 8px; width: 15px; border-width: 2px; }
+  #red-box-directions .rb-paper .rb-float { border-radius: 3px; box-shadow: none; }
+  #red-box-directions .rb-paper .rb-float.a { left: 47px; top: 33px; width: 42px; height: 42px; transform: rotate(-5deg); }
+  #red-box-directions .rb-paper .rb-float.b { left: 102px; bottom: 22px; width: 27px; height: 27px; transform: rotate(5deg); }
+  #red-box-directions .rb-paper .rb-float.c { display: none; }
+  #red-box-directions .rb-paper .rb-home-bottom { padding-top: 11px; }
+  #red-box-directions .rb-paper .rb-primary { background: var(--rb-ink); color: var(--rb-button-ink); border-radius: 5px; box-shadow: none; font-size: 15px; font-weight: 500; min-height: 52px; }
+  #red-box-directions .rb-paper .rb-primary:active { box-shadow: none; }
+  #red-box-directions .rb-paper .rb-link { font-weight: 400; font-size: 13px; }
+  #red-box-directions .rb-paper .rb-level { font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 15px; }
+  #red-box-directions .rb-paper .rb-instruction { text-align: left; padding-top: 44px; min-height: 133px; }
+  #red-box-directions .rb-paper .rb-title { font-family: 'DM Sans', sans-serif; font-size: 31px; font-weight: 500; letter-spacing: -1.5px; }
+  #red-box-directions .rb-paper .rb-subtitle { font-weight: 400; }
+  #red-box-directions .rb-paper .rb-tile { border-radius: var(--rb-radius, 6px); box-shadow: none; }
+  #red-box-directions .rb-paper .rb-tile.red { box-shadow: none; }
+  #red-box-directions .rb-paper .rb-tile.selected { transform: none; }
+  #red-box-directions .rb-paper .rb-board { gap: 12px; }
+  #red-box-directions .rb-paper .rb-progress-area { display: flex; justify-content: space-between; align-items: flex-start; min-height: 64px; gap: 12px; }
+  #red-box-directions .rb-paper .rb-progress { font-size: 13px; font-weight: 400; }
+  #red-box-directions .rb-paper .rb-dots { padding-top: 7px; order: 2; }
+  #red-box-directions .rb-paper .rb-dot { border-radius: 1px; width: 6px; height: 6px; }
+  #red-box-directions .rb-paper .rb-sheet { border-radius: 8px; }
+  #red-box-directions .rb-paper .rb-sheet-title { font-family: 'DM Sans', sans-serif; font-size: 25px; }
+  #red-box-directions .rb-paper .rb-secondary { background: var(--rb-tile); color: var(--rb-ink); }
+  #red-box-directions .rb-moon { color-scheme: dark; --rb-paper: #202931; --rb-ink: #f2e9db; --rb-muted: #b6bcbd; --rb-tile: #36414a; --rb-floor: #141d23; --rb-red: #ee826b; --rb-red-floor: #b75d4b; --rb-button-ink: #2b2521; --rb-overlay: #0a1119aa; font-family: 'Quicksand', sans-serif; border-radius: 36px; }
+  #red-box-directions .rb-moon .rb-wordmark { font-size: 12px; font-weight: 600; letter-spacing: 1.7px; text-transform: uppercase; }
+  #red-box-directions .rb-moon .rb-mini { transform: rotate(6deg); }
+  #red-box-directions .rb-moon .rb-art { height: 215px; margin-top: 23px; }
+  #red-box-directions .rb-moon .rb-mascot { width: 100px; height: 100px; border-radius: 24px; transform: rotate(5deg); box-shadow: 0 6px 0 var(--rb-red-floor), 0 20px 50px #ee826b14; }
+  #red-box-directions .rb-moon .rb-eyes { top: 43px; left: 29px; }
+  #red-box-directions .rb-moon .rb-eyes::before, #red-box-directions .rb-moon .rb-eyes::after { width: 9px; height: 5px; border: 2px solid #654137; border-top: 0; border-radius: 0 0 8px 8px; background: transparent; }
+  #red-box-directions .rb-moon .rb-smile { top: 57px; left: 43px; height: 7px; width: 14px; border-width: 2px; border-color: #654137; }
+  #red-box-directions .rb-moon .rb-cheek { display: none; }
+  #red-box-directions .rb-moon .rb-home-title { font-family: 'Quicksand', sans-serif; font-size: 34px; line-height: 1.16; font-weight: 600; letter-spacing: -1.3px; }
+  #red-box-directions .rb-moon .rb-home-caption { font-size: 14px; font-weight: 500; }
+  #red-box-directions .rb-moon .rb-float.a { left: 24px; top: 56px; width: 16px; height: 16px; transform: rotate(-14deg); border-radius: 4px; }
+  #red-box-directions .rb-moon .rb-float.b { right: 16px; bottom: 42px; width: 26px; height: 26px; transform: rotate(14deg); }
+  #red-box-directions .rb-moon .rb-float.c { bottom: 27px; left: 73px; width: 11px; height: 11px; border-radius: 3px; }
+  #red-box-directions .rb-moon .rb-primary { font-size: 16px; font-weight: 700; box-shadow: none; border-radius: 18px; }
+  #red-box-directions .rb-moon .rb-primary:active { box-shadow: none; }
+  #red-box-directions .rb-moon .rb-title, #red-box-directions .rb-moon .rb-sheet-title { font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: 27px; letter-spacing: -.9px; }
+  #red-box-directions .rb-moon .rb-tile { box-shadow: 0 5px 0 var(--rb-floor), inset 0 1px 0 #ffffff14; }
+  #red-box-directions .rb-moon .rb-tile.red { box-shadow: 0 5px 0 var(--rb-red-floor), inset 0 1px 0 #ffffff36; }
+  #red-box-directions .rb-moon .rb-secondary { background: var(--rb-tile); color: var(--rb-ink); }
+  #red-box-directions .rb-phone.rb-reduced .rb-tile { animation: none !important; transition: none !important; }
+  @keyframes rb-gentle-glow { 0%, 100% { filter: brightness(1); } 45% { filter: brightness(1.14); } }
+  @media (prefers-reduced-motion: reduce) { #red-box-directions .rb-tile { animation: none !important; transition: none !important; } }
+  @media (max-width: 380px) { #red-box-directions .rb-stage { padding: 24px 4px 22px; } #red-box-directions .rb-phone { padding-left: 21px; padding-right: 21px; } #red-box-directions .rb-board { gap: 13px; } }
+</style>
+<div id="red-box-directions" class="viz-dotted-background" aria-label="Approved Pocket toy design">
+  <section class="rb-stage" aria-label="Pocket toy design">
+    <div class="rb-phone" data-design="toy" aria-label="Pocket toy phone design"></div>
+  </section>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('red-box-directions');
+  const configs = {
+    toy: { name: 'Pocket toy', accent: '#ed6258', radius: 18, reduced: false, seconds: 3 },
+    paper: { name: 'Quiet paper', accent: '#cf5c48', radius: 6, reduced: false, seconds: 3 },
+    moon: { name: 'Moon room', accent: '#ee826b', radius: 18, reduced: false, seconds: 3 }
+  };
+  const instances = [];
+  function restore(saved) {
+    const values = saved?.privateContent?.designs;
+    if (!values || typeof values !== 'object') return;
+    Object.entries(configs).forEach(([key, config]) => {
+      const next = values[key];
+      if (!next || typeof next !== 'object') return;
+      if (typeof next.accent === 'string' && /^#[\da-f]{6}$/i.test(next.accent)) config.accent = next.accent;
+      if (Number.isFinite(next.radius)) config.radius = Math.max(2, Math.min(24, next.radius));
+      if (typeof next.reduced === 'boolean') config.reduced = next.reduced;
+      if ([3, 5].includes(next.seconds)) config.seconds = next.seconds;
+    });
+    instances.forEach(instance => instance.applyStyle());
+  }
+  restore(window.openai?.widgetState);
+  function save(design) {
+    if (!window.openai?.setWidgetState) return;
+    const designs = Object.fromEntries(Object.entries(configs).map(([key, value]) => [key, { ...value }]));
+    window.openai.setWidgetState({
+      modelContent: { lastInteractedDesign: configs[design].name, proposedSettings: designs },
+      privateContent: { designs }
+    }).catch(() => {});
+  }
+  window.addEventListener('openai:set_globals', event => {
+    if (event.detail?.globals?.widgetState) restore(event.detail.globals.widgetState);
+  });
+  const icon = name => `<i data-lucide="${name}" aria-hidden="true"></i>`;
+  const mascot = '<div class="rb-mascot" aria-hidden="true"><span class="rb-eyes"></span><span class="rb-smile"></span><span class="rb-cheek"></span></div><span class="rb-float a" aria-hidden="true"></span><span class="rb-float b" aria-hidden="true"></span><span class="rb-float c" aria-hidden="true"></span>';
+  root.querySelectorAll('[data-design]').forEach(phone => {
+    const design = phone.dataset.design;
+    const cfg = configs[design];
+    const title = design === 'paper' ? 'A little pause.<br>A little play.' : design === 'moon' ? 'A softer end<br>to your day.' : 'Red Box';
+    const caption = design === 'paper' ? 'Watch the red squares.<br>Remember. Tap the others.' : design === 'moon' ? 'A little memory game.<br>Nothing to rush.' : 'A tiny game. A little reset.<br>Take it one box at a time.';
+    const playLabel = design === 'paper' ? 'Start a round' : design === 'moon' ? 'Play a little' : "Let's play";
+    const art = `<div class="rb-art">${mascot}</div>`;
+    phone.innerHTML = `
+      <div class="rb-home-screen">
+        <div class="rb-top"><span class="rb-wordmark"><span class="rb-mini"></span>Red Box</span><button type="button" class="rb-icon cursor-interaction" data-action="settings" aria-label="Settings">${icon(design === 'moon' ? 'moon' : 'sliders-horizontal')}</button></div>
+        <div class="rb-home">
+          ${design === 'paper' ? '' : art}
+          <h1 class="rb-home-title">${title}</h1><p class="rb-home-caption">${caption}</p>
+          ${design === 'paper' ? art : ''}
+          <div class="rb-home-bottom"><button type="button" class="rb-primary cursor-interaction" data-action="play">${playLabel}${icon('arrow-right')}</button><button type="button" class="rb-link cursor-interaction" data-action="help">How to play</button></div>
+        </div>
+      </div>
+      <div class="rb-game-screen" hidden>
+        <div class="rb-top"><button type="button" class="rb-icon cursor-interaction" data-action="home" aria-label="Return home">${icon('arrow-left')}</button><span class="rb-level">Level 01</span><button type="button" class="rb-icon cursor-interaction" data-action="pause" aria-label="Pause game">${icon('pause')}</button></div>
+        <div class="rb-game"><div class="rb-instruction" aria-live="polite" aria-atomic="true"><h2 class="rb-title">Watch the red box</h2><p class="rb-subtitle">Remember where it is.</p></div><div class="rb-board-wrap"><div class="rb-board" role="group" aria-label="Memory game board"></div></div><div class="rb-progress-area" aria-live="polite"><div class="rb-dots" aria-hidden="true"></div><p class="rb-progress">Just watch for a moment</p></div><div class="rb-game-footer"><p class="rb-footer-note">A little focus. No hurry.</p><button type="button" class="rb-primary cursor-interaction rb-next" data-action="next" hidden>Next level${icon('arrow-right')}</button><button type="button" class="rb-primary cursor-interaction rb-retry" data-action="retry" hidden>Try again${icon('rotate-ccw')}</button></div></div>
+      </div>
+      <div class="rb-modal" hidden><div class="rb-sheet" role="dialog" aria-modal="true" aria-label="Game options"></div></div>`;
+    const home = phone.querySelector('.rb-home-screen');
+    const game = phone.querySelector('.rb-game-screen');
+    const board = phone.querySelector('.rb-board');
+    const heading = phone.querySelector('.rb-title');
+    const subtitle = phone.querySelector('.rb-subtitle');
+    const progress = phone.querySelector('.rb-progress');
+    const dots = phone.querySelector('.rb-dots');
+    const footer = phone.querySelector('.rb-footer-note');
+    const next = phone.querySelector('.rb-next');
+    const retry = phone.querySelector('.rb-retry');
+    const modal = phone.querySelector('.rb-modal');
+    const sheet = phone.querySelector('.rb-sheet');
+    let level = 1;
+    let phase = 'home';
+    let forbidden = new Set();
+    let selected = new Set();
+    let tiles = [];
+    let timers = [];
+    let focusedBeforeModal = null;
+    let paused = false;
+    function applyStyle() {
+      phone.style.setProperty('--rb-red', cfg.accent);
+      phone.style.setProperty('--rb-radius', `${cfg.radius}px`);
+      phone.classList.toggle('rb-reduced', cfg.reduced);
+    }
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+    function refreshIcons() { if (globalThis.lucide) lucide.createIcons({ attrs: { width: 18, height: 18 } }); }
+    function updateProgress() {
+      const safe = tiles.length - forbidden.size;
+      dots.innerHTML = Array.from({ length: safe }, (_, i) => `<span class="rb-dot${i < selected.size ? ' filled' : ''}"></span>`).join('');
+      progress.textContent = phase === 'preview' || phase === 'fade' ? 'Just watch for a moment' : phase === 'complete' ? 'Every safe box found' : phase === 'retry' ? 'Same round. A fresh start.' : `${selected.size} of ${safe} found`;
+    }
+    function disableBoard(value) { tiles.forEach(tile => tile.disabled = value || selected.has(Number(tile.dataset.tile))); }
+    function beginRound(replay = false) {
+      clearTimers();
+      paused = false;
+      selected = new Set();
+      home.hidden = true;
+      game.hidden = false;
+      next.hidden = true;
+      retry.hidden = true;
+      footer.hidden = false;
+      footer.textContent = 'A little focus. No hurry.';
+      phase = 'preview';
+      phone.querySelector('[data-action="pause"]').disabled = false;
+      phone.querySelector('.rb-level').textContent = `Level ${String(level).padStart(2, '0')}`;
+      const slots = level === 1 ? [0, 1, 2, 3] : level === 2 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, null, 4, 5, 6, 7];
+      const count = level === 1 ? 4 : level === 2 ? 6 : 8;
+      const forbiddenCount = level > 2 ? 2 : 1;
+      if (!replay) {
+        forbidden = new Set();
+        while (forbidden.size < forbiddenCount) forbidden.add(Math.floor(Math.random() * count));
+      }
+      board.style.setProperty('--rb-cols', level === 1 ? 2 : 3);
+      board.innerHTML = slots.map(id => id === null ? '<span class="rb-spacer" aria-hidden="true"></span>' : `<button type="button" class="rb-tile cursor-interaction" data-tile="${id}" aria-label="Box ${id + 1}" disabled></button>`).join('');
+      tiles = Array.from(board.querySelectorAll('[data-tile]'));
+      heading.textContent = forbiddenCount === 1 ? 'Watch the red box' : 'Watch the red boxes';
+      subtitle.textContent = forbiddenCount === 1 ? 'Remember where it is.' : 'Remember where they are.';
+      tiles.forEach(tile => {
+        if (forbidden.has(Number(tile.dataset.tile))) {
+          tile.classList.add('red', 'preview-red');
+          tile.setAttribute('aria-label', `Box ${Number(tile.dataset.tile) + 1}, red during preview`);
+        }
+      });
+      updateProgress();
+      later(() => {
+        phase = 'fade';
+        tiles.forEach(tile => {
+          tile.classList.remove('red', 'preview-red');
+          tile.setAttribute('aria-label', `Box ${Number(tile.dataset.tile) + 1}`);
+        });
+        later(() => {
+          phase = 'input';
+          heading.textContent = 'Tap the others';
+          subtitle.textContent = 'Leave the ones that glowed.';
+          disableBoard(false);
+          updateProgress();
+        }, cfg.reduced ? 0 : 280);
+      }, cfg.seconds * 1000);
+    }
+    function goHome() {
+      clearTimers();
+      phase = 'home';
+      paused = false;
+      home.hidden = false;
+      game.hidden = true;
+      closeModal(false);
+      home.querySelector('[data-action="play"]').focus({ preventScroll: true });
+    }
+    function closeModal(restoreFocus = true) {
+      modal.hidden = true;
+      home.inert = false;
+      game.inert = false;
+      if (restoreFocus && focusedBeforeModal?.isConnected) focusedBeforeModal.focus({ preventScroll: true });
+    }
+    function showModal(kind) {
+      focusedBeforeModal = document.activeElement;
+      home.inert = true;
+      game.inert = true;
+      const sheetTitle = kind === 'help' ? 'One little rule' : kind === 'pause' ? 'Take a breath' : 'At your pace';
+      sheet.setAttribute('aria-label', sheetTitle);
+      sheet.innerHTML = `<div class="rb-sheet-head"><h2 class="rb-sheet-title">${sheetTitle}</h2>${kind === 'pause' ? '' : `<button type="button" class="rb-icon cursor-interaction" data-action="close-modal" aria-label="Close">${icon('x')}</button>`}</div>`;
+      if (kind === 'help') sheet.innerHTML += '<div class="rb-steps"><div class="rb-step"><span class="rb-step-number">1</span><div><strong>Watch</strong><p>Some boxes glow red. Remember them.</p></div></div><div class="rb-step"><span class="rb-step-number">2</span><div><strong>Wait</strong><p>They fade. Every box looks normal.</p></div></div><div class="rb-step"><span class="rb-step-number">3</span><div><strong>Tap the others</strong><p>Correct taps turn red too. Leave the remembered boxes alone.</p></div></div></div><button type="button" class="rb-primary cursor-interaction" data-action="close-modal">Got it</button>';
+      if (kind === 'settings') sheet.innerHTML += `<label class="rb-setting">Preview time<select aria-label="Preview time" data-setting="seconds"><option value="3"${cfg.seconds === 3 ? ' selected' : ''}>3 seconds</option><option value="5"${cfg.seconds === 5 ? ' selected' : ''}>5 seconds</option></select></label><label class="rb-setting">Reduced motion<input type="checkbox" data-setting="reduced"${cfg.reduced ? ' checked' : ''}></label><button type="button" class="rb-primary cursor-interaction" data-action="close-modal">All set</button>`;
+      if (kind === 'pause') sheet.innerHTML += '<p class="rb-sheet-copy">Your round is waiting.<br>We’ll show the red boxes again.</p><button type="button" class="rb-primary cursor-interaction" data-action="resume">Continue</button><button type="button" class="rb-primary rb-secondary cursor-interaction" data-action="home">Return home</button>';
+      modal.hidden = false;
+      refreshIcons();
+      sheet.querySelector('button, select, input')?.focus({ preventScroll: true });
+    }
+    phone.addEventListener('click', event => {
+      const tile = event.target.closest('[data-tile]');
+      if (tile && phase === 'input' && !tile.disabled) {
+        const id = Number(tile.dataset.tile);
+        if (forbidden.has(id)) {
+          phase = 'retry';
+          phone.querySelector('[data-action="pause"]').disabled = true;
+          disableBoard(true);
+          tiles.forEach(item => {
+            item.classList.toggle('red', forbidden.has(Number(item.dataset.tile)));
+            item.classList.remove('selected');
+            item.setAttribute('aria-label', `Box ${Number(item.dataset.tile) + 1}${forbidden.has(Number(item.dataset.tile)) ? ', remembered red box' : ''}`);
+          });
+          heading.textContent = "Let's try that again";
+          subtitle.textContent = 'These were the boxes to leave.';
+          footer.hidden = true;
+          retry.hidden = false;
+          updateProgress();
+          retry.focus({ preventScroll: true });
+          return;
+        }
+        selected.add(id);
+        tile.classList.add('red', 'selected');
+        tile.disabled = true;
+        tile.setAttribute('aria-label', `Box ${id + 1}, selected`);
+        if (selected.size === tiles.length - forbidden.size) {
+          phase = 'complete';
+          phone.querySelector('[data-action="pause"]').disabled = true;
+          disableBoard(true);
+          heading.textContent = design === 'paper' ? 'Nicely done.' : design === 'moon' ? 'A lovely little win.' : 'Lovely!';
+          subtitle.textContent = 'Ready for one more?';
+          footer.hidden = true;
+          next.hidden = false;
+          next.firstChild.textContent = level === 3 ? 'Play again' : 'Next level';
+          next.focus({ preventScroll: true });
+        }
+        updateProgress();
+        return;
+      }
+      const action = event.target.closest('[data-action]')?.dataset.action;
+      if (!action) return;
+      if (action === 'play') { save(design); beginRound(); }
+      if (action === 'next') { level = level === 3 ? 1 : level + 1; beginRound(); }
+      if (action === 'retry') beginRound(true);
+      if (action === 'home') goHome();
+      if (action === 'help' || action === 'settings') showModal(action);
+      if (action === 'close-modal') closeModal();
+      if (action === 'pause') {
+        if (phase === 'complete' || phase === 'retry') return;
+        clearTimers(); paused = true; disableBoard(true); showModal('pause');
+      }
+      if (action === 'resume') { closeModal(); beginRound(true); }
+    });
+    phone.addEventListener('change', event => {
+      const setting = event.target.dataset.setting;
+      if (setting === 'seconds') cfg.seconds = Number(event.target.value);
+      if (setting === 'reduced') cfg.reduced = event.target.checked;
+      applyStyle(); save(design);
+    });
+    phone.addEventListener('keydown', event => {
+      if (modal.hidden) return;
+      if (event.key === 'Escape') {
+        if (paused) { closeModal(); beginRound(true); } else closeModal();
+      }
+      if (event.key === 'Tab') {
+        const focusables = Array.from(sheet.querySelectorAll('button, input, select')).filter(el => !el.disabled && !el.hidden);
+        const first = focusables[0]; const last = focusables[focusables.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !game.hidden && !paused && ['preview', 'fade', 'input'].includes(phase)) {
+        clearTimers(); paused = true; disableBoard(true); showModal('pause');
+      }
+    });
+    applyStyle();
+    instances.push({ applyStyle });
+    if (globalThis.Tweak) {
+      const tweak = new Tweak({ container: phone, onChange: () => { applyStyle(); save(design); } });
+      tweak.addColorPicker(cfg, 'accent', { label: 'Red tone', reference: '--rb-red' });
+      tweak.addSlider(cfg, 'radius', { label: 'Box corners', min: 2, max: 24, step: 1, unit: 'px', reference: '--rb-radius' });
+      tweak.addToggle(cfg, 'reduced', { label: 'Reduced motion' });
+    }
+  });
+})();
+</script>

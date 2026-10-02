@@ -1,0 +1,167 @@
+[
+  {
+    "level": 1,
+    "seed": 20261002,
+    "name": "Little tray",
+    "columns": 3,
+    "rows": 2,
+    "boxes": 6,
+    "redCount": 1,
+    "mask": [
+      "###",
+      "###"
+    ],
+    "redIds": [
+      4
+    ]
+  },
+  {
+    "level": 2,
+    "seed": 20261002,
+    "name": "Little leaf",
+    "columns": 4,
+    "rows": 4,
+    "boxes": 8,
+    "redCount": 1,
+    "mask": [
+      "..#.",
+      ".###",
+      "###.",
+      ".#.."
+    ],
+    "redIds": [
+      3
+    ]
+  },
+  {
+    "level": 3,
+    "seed": 20261002,
+    "name": "Stepping stones",
+    "columns": 4,
+    "rows": 4,
+    "boxes": 10,
+    "redCount": 1,
+    "mask": [
+      "##..",
+      "###.",
+      ".###",
+      "..##"
+    ],
+    "redIds": [
+      1
+    ]
+  },
+  {
+    "level": 4,
+    "seed": 20261002,
+    "name": "Bridge",
+    "columns": 3,
+    "rows": 5,
+    "boxes": 12,
+    "redCount": 1,
+    "mask": [
+      "###",
+      "##.",
+      "##.",
+      "##.",
+      "###"
+    ],
+    "redIds": [
+      10
+    ]
+  },
+  {
+    "level": 5,
+    "seed": 20261002,
+    "name": "Petals",
+    "columns": 3,
+    "rows": 5,
+    "boxes": 9,
+    "redCount": 1,
+    "mask": [
+      ".#.",
+      "###",
+      ".#.",
+      "###",
+      ".#."
+    ],
+    "redIds": [
+      1
+    ]
+  },
+  {
+    "level": 50,
+    "seed": 20261002,
+    "name": "Wings",
+    "columns": 4,
+    "rows": 5,
+    "boxes": 13,
+    "redCount": 1,
+    "mask": [
+      "..##",
+      ".###",
+      "###.",
+      ".###",
+      "..##"
+    ],
+    "redIds": [
+      2
+    ]
+  },
+  {
+    "level": 70,
+    "seed": 20261002,
+    "name": "Bridge",
+    "columns": 5,
+    "rows": 3,
+    "boxes": 12,
+    "redCount": 2,
+    "mask": [
+      "#####",
+      "#####",
+      "#...#"
+    ],
+    "redIds": [
+      7,
+      11
+    ]
+  },
+  {
+    "level": 100,
+    "seed": 20261002,
+    "name": "Clover",
+    "columns": 4,
+    "rows": 4,
+    "boxes": 12,
+    "redCount": 2,
+    "mask": [
+      ".##.",
+      "####",
+      "####",
+      ".##."
+    ],
+    "redIds": [
+      2,
+      3
+    ]
+  },
+  {
+    "level": 1000,
+    "seed": 20261002,
+    "name": "Pebble ring",
+    "columns": 3,
+    "rows": 3,
+    "boxes": 8,
+    "redCount": 3,
+    "mask": [
+      "###",
+      "#.#",
+      "###"
+    ],
+    "redIds": [
+      0,
+      1,
+      2
+    ]
+  }
+]
