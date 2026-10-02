@@ -55,21 +55,25 @@ Suggested category: **Game → Puzzle**. The current build has no advertisements
 
 The Play Console app record and English listing are created. The icon, feature graphic, and six marketing screenshots are uploaded in filename order and declared as created or edited using AI. Privacy, unrestricted app access, no ads, all age groups, content ratings, no data collection/sharing, no advertising ID, and the government/financial/health declarations are saved. IARC assigned Everyone in North America and PEGI 3 in Europe.
 
-Version **1.0.0 (1)** is uploaded to an internal-testing release. The bundle is accepted with API 24+ support and target SDK 36. Select the intended testers, run device testing and the pre-launch report, then review production country availability and the final submission. Store approval is not guaranteed by a successful local build. Internal testing and production publication are separate actions.
+Version **1.0.0 (1)** is available to the existing six-person **Sutechs Alpha Testers** list on the active internal-testing track. The bundle is accepted with API 24+ support and target SDK 36.
+
+On **October 3, 2026**, the same bundle, listing, and declarations were submitted for a full production rollout. Play Console shows **Changes in review**, with automated checks running before review. Managed publishing is off, so approved changes publish automatically. Availability targets 175 countries/regions plus Rest of World, excluding China and Vietnam. Store approval is not guaranteed by a successful local build, and the production app is not publicly launched yet.
 
 The Android build targets API **36** and supports API **24+**. Google requires API 36 for new phone app submissions from August 31, 2026. New personal accounts created after November 13, 2023 may need a closed test with 12 opted-in testers for 14 continuous days before applying for production access. Verify the account’s own dashboard requirements.
 
 Official references: [target API requirements](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en), [preview asset specifications](https://support.google.com/googleplay/android-developer/answer/9866151), [testing requirements](https://support.google.com/googleplay/android-developer/answer/14151465?hl=en), [16 KB page-size support](https://developer.android.com/guide/practices/page-sizes).
 
-## App Store — in preparation
+## App Store — submitted for review
 
-The iOS app record is created as **Red Box: A Little Reset** with SKU `sutechs-redbox-ios`. The English description, subtitle, promotional text, keywords, support/marketing URLs, review instructions, and private review contact are saved in App Store Connect. The app is categorized as Games → Puzzle / Casual, rated 4+, and uses Apple's standard EULA. App Privacy is published as **Data Not Collected**, with the canonical SuTechs privacy URL. The app is free and uses manual release after approval.
+The iOS app record is created as **Red Box: A Little Reset** with SKU `sutechs-redbox-ios`. The English description, subtitle, promotional text, keywords, support/marketing URLs, review instructions, and private review contact are saved in App Store Connect. The app is categorized as Games → Puzzle / Casual, rated 4+, and uses Apple's standard EULA. App Privacy is published as **Data Not Collected**, with the canonical SuTechs privacy URL. The app is free and uses automatic release after approval.
 
 Six iPhone screenshots at **1320×2868** and six iPad screenshots at **2064×2752** are uploaded in filename order. They are marketing compositions around actual Flutter captures with iOS layout and safe areas, rather than resized Android captures. Copy and exports live in `store/app-store/`; contact sheets are `docs/store-preview-iphone.jpg` and `docs/store-preview-ipad.jpg`.
 
 The signed archive exported successfully, and **1.0.0 (1)** was uploaded, processed, and attached to the App Store version. The local IPA is `build/ios/ipa/redbox.ipa`. Signing/export/upload logs and account-specific export options stay in ignored `release-private/`. Team selection is supplied locally rather than committed to the Xcode project. The app includes local-font notices and the shared-preferences required-API privacy manifest.
 
-Launch availability is staged for **173 regions**, excluding mainland China and Vietnam pending the required game licensing documents. Apple's [regional requirements](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information) describe those documents. Test the processed build on real iPhones and iPads and review the final submission before sending it to App Review. Neither native store is publicly launched yet.
+On **October 3, 2026**, version **1.0.0 (1)** was submitted to App Review and shows **Waiting for Review**. The **Red Box Testers** internal TestFlight group contains the build with status **Testing**, and the existing eligible App Store Connect user has been invited. New builds are added to the group manually.
+
+Launch availability is set for **173 regions**, excluding mainland China and Vietnam pending the required game licensing documents. Apple's [regional requirements](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information) describe those documents. Neither native store is publicly launched yet.
 
 ## Regenerate the visuals
 
