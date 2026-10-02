@@ -246,51 +246,58 @@ Future<void> showPocketSettings(
   ),
 );
 
-Future<void> showPrivacyAndAbout(BuildContext context) =>
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => PocketSheet(
-        title: 'A little space for you',
-        children: [
-          const Text(
-            'Red Box is made by SuTechs. Your levels and preferences stay on '
-            'this device. We do not collect or share your gameplay data, and '
-            'there are no accounts, ads, tracking, or in-app purchases.',
-            style: PocketType.body,
-          ),
-          const SizedBox(height: 14),
-          const Text(
-            'You can remove locally saved data by clearing app data or '
-            'uninstalling. In a browser, clear this site’s storage. The web '
-            'version is hosted by GitHub Pages, which may process ordinary '
-            'request logs such as your IP address.',
-            style: PocketType.body,
-          ),
-          const SizedBox(height: 14),
-          const SelectableText('redbox@sutechs.com', style: PocketType.body),
-          const SizedBox(height: 8),
-          const SelectableText(
-            'sutechs.github.io/redbox/privacy.html',
-            style: PocketType.body,
-          ),
-          TextButton(
-            onPressed: () => showLicensePage(
-              context: context,
-              applicationName: 'Red Box',
-              applicationVersion: '1.0.0',
-              applicationLegalese: '© 2026 SuTechs',
-            ),
-            child: const Text('Open-source licenses'),
-          ),
-          const SizedBox(height: 12),
-          PocketButton(
-            label: 'Lovely',
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
+Future<void> showPrivacyAndAbout(
+  BuildContext context,
+) => showModalBottomSheet<void>(
+  context: context,
+  isScrollControlled: true,
+  builder: (context) => PocketSheet(
+    title: 'Privacy & about',
+    children: [
+      const Text(
+        'Red Box is made by SuTechs. Your levels and preferences stay on '
+        'this device. We do not collect or share your gameplay data, and '
+        'there are no accounts, ads, tracking, or in-app purchases.',
+        style: PocketType.body,
       ),
-    );
+      const SizedBox(height: 14),
+      const Text(
+        'You can remove locally saved data by clearing app data or '
+        'uninstalling. In a browser, clear this site’s storage. The web '
+        'version is hosted by GitHub Pages, which may process ordinary '
+        'request logs such as your IP address.',
+        style: PocketType.body,
+      ),
+      const SizedBox(height: 14),
+      const Text(
+        'Privacy policy · Red Box by SuTechs · October 2, 2026. '
+        'If you email us, we receive the information you choose to send and '
+        'use it to answer your request. We retain support messages only as '
+        'needed for support and any legal obligations. Contact us to request '
+        'deletion. We do not knowingly collect personal data from children.',
+        style: PocketType.body,
+      ),
+      const SizedBox(height: 14),
+      const SelectableText('redbox@sutechs.com', style: PocketType.body),
+      const SizedBox(height: 8),
+      const SelectableText(
+        'sutechs.github.io/redbox/privacy.html',
+        style: PocketType.body,
+      ),
+      TextButton(
+        onPressed: () => showLicensePage(
+          context: context,
+          applicationName: 'Red Box',
+          applicationVersion: '1.0.0',
+          applicationLegalese: '© 2026 SuTechs',
+        ),
+        child: const Text('Open-source licenses'),
+      ),
+      const SizedBox(height: 12),
+      PocketButton(label: 'Lovely', onPressed: () => Navigator.pop(context)),
+    ],
+  ),
+);
 
 class _SettingSwitch extends StatelessWidget {
   const _SettingSwitch({
