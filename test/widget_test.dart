@@ -107,6 +107,27 @@ List<int> tileIds(WidgetTester tester) => tester
     .toList();
 
 void main() {
+  testWidgets('Privacy policy and support are available inside settings', (
+    tester,
+  ) async {
+    final (settings, _) = await mount(tester);
+    await tapVisible(tester, find.byTooltip('Settings'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Privacy & about'));
+    await tester.pumpAndSettle();
+    expect(find.text('redbox@sutechs.com'), findsOneWidget);
+    expect(
+      find.textContaining('Privacy policy · Red Box by SuTechs'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('We do not collect or share'), findsOneWidget);
+    await tapVisible(tester, find.text('Open-source licenses'));
+    await tester.pumpAndSettle();
+    expect(find.text('Licenses'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    settings.dispose();
+  });
+
   testWidgets('Home, tutorial and sound settings work', (tester) async {
     final (settings, sounds) = await mount(tester);
     expect(find.text('Red Box'), findsNWidgets(2));
