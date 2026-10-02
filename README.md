@@ -5,11 +5,14 @@
 <h1 align="center">Red Box</h1>
 <p align="center"><strong>A tiny game. A little reset.</strong><br>Remember the red boxes, then enjoy tapping the others.</p>
 <p align="center">
+  <a href="https://sutechs.com/redbox">Red Box website</a> ·
   <a href="https://sutechs.github.io/redbox/">Play in your browser</a> ·
+  <a href="https://play.google.com/store/apps/details?id=com.sutechs.redbox">Google Play</a> ·
+  <a href="https://apps.apple.com/app/id6818607149">App Store</a> ·
   <a href="https://sutechs.com/privacy">Privacy</a> ·
   <a href="https://sutechs.github.io/redbox/support.html">Support</a>
 </p>
-<p align="center">Flutter · Android · iOS · Web<br>Google Play in preparation · App Store coming soon</p>
+<p align="center">Flutter · Android · iOS · Web</p>
 
 ![Red Box — a tiny game, a little reset](docs/banner.png)
 
@@ -73,6 +76,8 @@ dart run tools/preview_patterns.dart 20261002
 The approved Pocket toy guide is saved in [design/pocket-toy.html](design/pocket-toy.html). [DESIGN.md](DESIGN.md) documents color, typography, spacing, motion, and board rules; [product.md](product.md) explains gameplay. [The pattern sheet](design/pattern-samples.png) shows the function’s exact output.
 
 ## Releases
+
+Find Red Box on [Google Play](https://play.google.com/store/apps/details?id=com.sutechs.redbox), [App Store](https://apps.apple.com/app/id6818607149), or [play online](https://sutechs.github.io/redbox/). Visit [sutechs.com/redbox](https://sutechs.com/redbox) for a little look inside.
 
 [RELEASING.md](RELEASING.md) covers signing, store assets, GitHub Pages, and remaining account steps. Android release builds require a real upload key and fail clearly when signing configuration is missing. Credentials, keystores, and local release files are ignored by Git.
 
