@@ -35,6 +35,8 @@ for scale in [1,2,3]:
     suffix = '' if scale == 1 else f'@{scale}x'
     export(f'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage{suffix}.png',168*scale)
 export('store/google-play/icon.png',512)
+store_icon = ROOT / 'store/google-play/icon.png'
+Image.open(store_icon).convert('RGBA').save(store_icon, optimize=True)
 
 # A marketing layout using the approved logo and the game's own tiles.
 canvas = Image.new('RGB',(1024,500),'#FFF8ED')
