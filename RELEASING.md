@@ -67,9 +67,9 @@ The iOS app record is created as **Red Box: A Little Reset** with SKU `sutechs-r
 
 Six iPhone screenshots at **1320×2868** and six iPad screenshots at **2064×2752** are uploaded in filename order. They are marketing compositions around actual Flutter captures with iOS layout and safe areas, rather than resized Android captures. Copy and exports live in `store/app-store/`; contact sheets are `docs/store-preview-iphone.jpg` and `docs/store-preview-ipad.jpg`.
 
-The signed archive exported successfully, and **1.0.0 (1)** was uploaded to App Store Connect. The local IPA is `build/ios/ipa/redbox.ipa`. Signing/export/upload logs and account-specific export options stay in ignored `release-private/`. Team selection is supplied locally rather than committed to the Xcode project. The app includes local-font notices and the shared-preferences required-API privacy manifest.
+The signed archive exported successfully, and **1.0.0 (1)** was uploaded, processed, and attached to the App Store version. The local IPA is `build/ios/ipa/redbox.ipa`. Signing/export/upload logs and account-specific export options stay in ignored `release-private/`. Team selection is supplied locally rather than committed to the Xcode project. The app includes local-font notices and the shared-preferences required-API privacy manifest.
 
-Launch availability is staged for **173 regions**, excluding mainland China and Vietnam pending the required game licensing documents. Apple's [regional requirements](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information) describe those documents. Test the processed build on real iPhones and iPads, attach it to the App Store version, and review the final submission before sending it to App Review. Neither native store is publicly launched yet.
+Launch availability is staged for **173 regions**, excluding mainland China and Vietnam pending the required game licensing documents. Apple's [regional requirements](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information) describe those documents. Test the processed build on real iPhones and iPads and review the final submission before sending it to App Review. Neither native store is publicly launched yet.
 
 ## Regenerate the visuals
 
