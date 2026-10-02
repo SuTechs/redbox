@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,8 +39,29 @@ class QuietMusic implements MusicPlayback {
 
 void main() {
   testWidgets('Export the real Pocket toy screens', (tester) async {
-    tester.view.physicalSize = const Size(360, 640);
+    const device = String.fromEnvironment(
+      'SCREENSHOT_DEVICE',
+      defaultValue: 'android',
+    );
+    final apple = device != 'android';
+    final tablet = device == 'ipad';
+    tester.view.physicalSize = tablet
+        ? const Size(1032, 1376)
+        : apple
+        ? const Size(440, 956)
+        : const Size(360, 640);
     tester.view.devicePixelRatio = 1;
+    if (apple) {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      tester.view.padding = FakeViewPadding(
+        top: tablet ? 24 : 59,
+        bottom: tablet ? 20 : 34,
+      );
+      tester.view.viewPadding = tester.view.padding;
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    }
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     for (final family in ['Fredoka', 'Nunito']) {
@@ -72,9 +94,11 @@ void main() {
       final boundary =
           frame.currentContext!.findRenderObject() as RenderRepaintBoundary;
       await tester.runAsync(() async {
-        final image = await boundary.toImage(pixelRatio: 3);
+        final image = await boundary.toImage(pixelRatio: tablet ? 2 : 3);
         final data = await image.toByteData(format: ui.ImageByteFormat.png);
-        for (final folder in ['docs/screenshots']) {
+        for (final folder in [
+          apple ? 'docs/screenshots/$device' : 'docs/screenshots',
+        ]) {
           final file = File('$folder/$name.png');
           await file.parent.create(recursive: true);
           await file.writeAsBytes(data!.buffer.asUint8List());
@@ -122,5 +146,6 @@ void main() {
     await save('06-music');
     await tester.pumpWidget(const SizedBox());
     settings.dispose();
+    debugDefaultTargetPlatformOverride = null;
   });
 }

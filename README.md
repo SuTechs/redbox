@@ -6,7 +6,7 @@
 <p align="center"><strong>A tiny game. A little reset.</strong><br>Remember the red boxes, then enjoy tapping the others.</p>
 <p align="center">
   <a href="https://sutechs.github.io/redbox/">Play in your browser</a> ·
-  <a href="https://sutechs.github.io/redbox/privacy.html">Privacy</a> ·
+  <a href="https://sutechs.com/privacy">Privacy</a> ·
   <a href="https://sutechs.github.io/redbox/support.html">Support</a>
 </p>
 <p align="center">Flutter · Android · iOS · Web<br>Google Play in preparation · App Store coming soon</p>
@@ -78,12 +78,16 @@ The approved Pocket toy guide is saved in [design/pocket-toy.html](design/pocket
 
 Every push to `main` runs format, analysis, and tests, then builds and deploys the game to GitHub Pages. Pull requests run the checks without deploying. The separate Android workflow can build a signed App Bundle when release secrets are configured; it does not automatically submit to Google Play.
 
-Regenerate the marketing screenshots from the real Flutter UI:
+Regenerate the marketing screenshots from the real Flutter UI. iPhone and iPad exports are also preserved under `store/app-store/screenshots/`:
 
 ```sh
 flutter test tools/capture_screenshots_test.dart
 python3 -m pip install Pillow
 python3 tools/render_store_assets.py
+flutter test tools/capture_screenshots_test.dart --dart-define=SCREENSHOT_DEVICE=iphone
+python3 tools/render_store_assets.py --device iphone
+flutter test tools/capture_screenshots_test.dart --dart-define=SCREENSHOT_DEVICE=ipad
+python3 tools/render_store_assets.py --device ipad
 ```
 
 ## Inside the box

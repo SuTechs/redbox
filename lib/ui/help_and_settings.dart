@@ -281,9 +281,11 @@ Future<void> showPrivacyAndAbout(
       const SelectableText('redbox@sutechs.com', style: PocketType.body),
       const SizedBox(height: 8),
       const SelectableText(
-        'sutechs.github.io/redbox/privacy.html',
+        'https://sutechs.com/privacy',
         style: PocketType.body,
       ),
+      const SizedBox(height: 8),
+      const SelectableText('https://sutechs.com/terms', style: PocketType.body),
       TextButton(
         onPressed: () => showLicensePage(
           context: context,

@@ -1,11 +1,19 @@
 """Compose honest marketing screenshots from the real Flutter captures."""
 from pathlib import Path
+import argparse
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / 'store/google-play/screenshots'
+parser = argparse.ArgumentParser()
+parser.add_argument('--device', choices=['android', 'iphone', 'ipad'], default='android')
+device = parser.parse_args().device
+OUT = ROOT / ('store/google-play/screenshots' if device == 'android' else f'store/app-store/screenshots/{device}')
 OUT.mkdir(parents=True, exist_ok=True)
-W, H = 1080, 1920
+W, H = {'android': (1080,1920), 'iphone': (1320,2868), 'ipad': (2064,2752)}[device]
+# Design on the same 1080-wide canvas, then export to the store's exact device size.
+scale = W / 1080
+H = round(H / scale)
+W = 1080
 INK, MUTED, RED = '#40342E', '#806D5C', '#ED6258'
 
 def font(family, size, weight):
@@ -62,18 +70,22 @@ for index,(name,screen,headline,subtitle,footer,bg) in enumerate(slides):
     wrapped(d,subtitle,69,408,920,font('Nunito',34,'SemiBold'),MUTED,47)
 
     # Composed, softly framed screenshots; all UI inside is captured from Flutter.
-    px,py,pw,ph=205,576,670,1191
+    px,py,pw,ph = {'android': (205,576,670,1191), 'iphone': (142,540,796,1729), 'ipad': (50,475,980,1307)}[device]
+    if device == 'ipad':
+        # A broad tablet composition gives the real tablet UI room to breathe.
+        px,py,pw,ph = 230,480,620,827
     shadow=Image.new('RGBA',(W,H),(0,0,0,0))
     sd=ImageDraw.Draw(shadow)
     sd.rounded_rectangle((px-20,py+22,px+pw+20,py+ph+28),72,fill=(94,65,47,35))
     shadow=shadow.filter(ImageFilter.GaussianBlur(24))
     canvas.alpha_composite(shadow)
     tile(canvas,19,770,113,15)
-    tile(canvas,879,1350,111,-12,True)
+    tile(canvas,879,min(H-250,1350),111,-12,True)
     tile(canvas,854,643,63,-16)
     d=ImageDraw.Draw(canvas)
     d.rounded_rectangle((px-12,py-12,px+pw+12,py+ph+12),64,fill='#E9DCCB')
-    capture=Image.open(ROOT/f'docs/screenshots/{screen}.png').convert('RGBA')
+    source = 'docs/screenshots' if device == 'android' else f'docs/screenshots/{device}'
+    capture=Image.open(ROOT/f'{source}/{screen}.png').convert('RGBA')
     capture=capture.resize((pw,ph),Image.Resampling.LANCZOS)
     mask=Image.new('L',(pw,ph),0)
     ImageDraw.Draw(mask).rounded_rectangle((0,0,pw-1,ph-1),52,fill=255)
@@ -82,18 +94,21 @@ for index,(name,screen,headline,subtitle,footer,bg) in enumerate(slides):
     d=ImageDraw.Draw(canvas)
     footer_face=font('Nunito',28,'Bold')
     fw=d.textlength(footer,font=footer_face)
-    d.text(((W-fw)/2,1834),footer,font=footer_face,fill=MUTED)
+    d.text(((W-fw)/2,H-65),footer,font=footer_face,fill=MUTED)
     final=canvas.convert('RGB')
+    target_size = {'android': (1080,1920), 'iphone': (1320,2868), 'ipad': (2064,2752)}[device]
+    final = final.resize(target_size,Image.Resampling.LANCZOS)
     path=OUT/f'{name}.png'; final.save(path,optimize=True)
     outputs.append(final)
 
 # Clear the old raw store exports only after the six marketing assets exist.
-for old in ['01-home','02-levels','03-remember','04-tap','05-lovely','06-music']:
+for old in (['01-home','02-levels','03-remember','04-tap','05-lovely','06-music'] if device == 'android' else []):
     stale=OUT/f'{old}.png'
     if stale.exists(): stale.unlink()
 
-sheet=Image.new('RGB',(1080,1340),'#E9DCCB')
+thumb_h = round(352 * outputs[0].height / outputs[0].width)
+sheet=Image.new('RGB',(1080,(thumb_h+34)*2+8),'#E9DCCB')
 for i,slide in enumerate(outputs):
-    sheet.paste(slide.resize((352,626),Image.Resampling.LANCZOS),(8+(i%3)*360,8+(i//3)*660))
-sheet.save(ROOT/'docs/store-preview.jpg',quality=93)
-print('Rendered six 1080×1920 marketing screenshots and the review contact sheet.')
+    sheet.paste(slide.resize((352,thumb_h),Image.Resampling.LANCZOS),(8+(i%3)*360,8+(i//3)*(thumb_h+34)))
+sheet.save(ROOT/('docs/store-preview.jpg' if device == 'android' else f'docs/store-preview-{device}.jpg'),quality=93)
+print(f'Rendered six {target_size[0]}×{target_size[1]} {device} marketing screenshots and the review contact sheet.')
