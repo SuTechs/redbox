@@ -18,7 +18,7 @@
 
 ## A moment for you
 
-Red Box is a warm, tactile memory game for a gentle break. A few boxes glow red, then fade. Remember them and tap every other box. Each correct tap turns red too, so the board becomes a small, satisfying puzzle. There is no countdown while tapping and no penalty for trying again.
+Red Box is a warm, tactile memory game with two ways to play: **Normal** builds into a memory challenge, and **Zen** keeps the original gentle break. A few boxes glow red, then fade. Remember them and tap every other box. In Normal, later levels visibly shuffle some boxes before you tap, so follow the boxes that glowed. Each correct tap turns red too, so the board becomes a small, satisfying puzzle. There is no countdown while tapping and no penalty for trying again.
 
 <p align="center">
   <img src="store/google-play/screenshots/01-a-little-reset.png" width="30%" alt="A tiny game. A little reset.">
@@ -31,9 +31,18 @@ Red Box is a warm, tactile memory game for a gentle break. A few boxes glow red,
   <img src="store/google-play/screenshots/06-one-more-smile.png" width="30%" alt="One more box. One more smile.">
 </p>
 
+## Two ways to play
+
+- **Normal:** starts with 8 boxes and one red, then builds to 26–30 boxes, up to 10 reds, shorter previews, and up to six visible pair swaps. Shuffles begin at level 10. The curve caps at a playable challenge; the levels keep going.
+- **Zen:** the original relaxed experience — varied 6–16-box shapes, one to three reds, 3/5-second previews, easy moments, and no shuffles.
+
+Choose a mode on Home or toggle **Zen mode** in Settings. Each mode saves its own progress. Updating from v1 preserves your old levels in Zen and starts Normal at level 1. Reduced motion disables shuffles, and **Extra time** offers longer Normal previews. There is no countdown while tapping in either mode.
+
+The [difficulty plan](docs/plans/normal-and-zen.md) records the curve and fairness rules. [Normal preview](docs/difficulty/02-normal-preview.png), [shuffle](docs/difficulty/shuffle.gif), and [late Normal board](docs/difficulty/04-normal-expert.png) show the real Flutter UI. Regenerate with `flutter test tools/capture_difficulty_test.dart` followed by `python3 tools/render_difficulty_gif.py` (requires Pillow).
+
 ## The little things
 
-- **Endless, varied shapes.** Seeded silhouettes use 6–16 square boxes; the opening boards have 6, 8, 10, 12, and 9. A gentle curve begins with one red box and gradually mixes one to three.
+- **Endless, varied Zen shapes.** Seeded silhouettes use 6–16 square boxes; the opening boards have 6, 8, 10, 12, and 9. A gentle curve begins with one red box and gradually mixes one to three.
 - **Fresh memories.** Retries and replays choose new red positions. Pause and resume preserve the round.
 - **Little steps.** Browse unlocked levels, replay a favorite, or jump to a previous level without losing your progress.
 - **Your own quiet soundtrack.** Two original ambient loops, Cloud drift and Warm keys, gentle tap sounds, separate audio switches, and one action to mute everything.
@@ -59,7 +68,7 @@ flutter build ios --simulator --debug
 flutter build web --release --no-web-resources-cdn --no-wasm-dry-run
 ```
 
-The tests cover reproducible connected shapes, variety, red-position randomness, full rounds, retry, pause/resume, progress, audio, and fully visible square touch targets on small screens.
+The tests cover connected seeded shapes in both modes, red-position randomness, tracked shuffles, full rounds, retry, pause/resume, reduced motion, progress migration, independent mode progress, audio, and square 48px touch targets on small and large-text screens.
 
 ## Patterns and design
 

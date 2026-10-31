@@ -57,6 +57,14 @@ Tutorial, settings, and pause use cream bottom sheets with rounded upper corners
 
 Bundle original, quiet WAV cues for taps, continuing, completion, and mistakes. Background music offers two original 64-second looping compositions: Cloud drift (slow ambient chords) and Warm keys (sparse soft notes). Keep music quieter than taps, fade starts and changes, and pause it in the background. Separate music and tap-sound switches, a track picker, and Mute all audio are available in settings. Music & sound is also accessible from the game's pause sheet. Haptics can be disabled separately.
 
-## Gameplay commitments
+## Normal and Zen
+
+Preserve the same cream/coral Pocket toy style in both modes. Home has a tactile Normal / Zen segmented control; Settings has a Zen mode switch. Show the active mode on Levels and Game. Zen keeps the original gameplay below. Normal adds larger silhouettes (at most five columns), more remembered boxes, shorter previews, and visible pair swaps from level 10. See [the difficulty plan](docs/plans/normal-and-zen.md).
+
+For shuffles, fade all red cues first, lock taps, then move one remembered/safe pair at a time along opposite arcs. Each swap moves for 650ms with a 180ms settling gap. Draw moving boxes above stationary boxes. Keep 48px square targets; allow vertical scrolling for larger boards on short phones and wrap progress dots. Reduced motion disables shuffling rather than concealing an instantaneous rearrangement.
+
+Progress and current level are separate per mode. Old progress belongs to Zen. Mode changes happen from Home or Levels; the pause sheet keeps the current round's mode fixed. Extra time works in Normal too.
+
+## Zen gameplay commitments
 
 Fresh rounds randomize red positions, including level 1. Retry regenerates the red set; recent same-level repetitions are avoided. Pause/resume keeps the current pattern. Levels never wrap back to 1. Shapes with 6–16 boxes vary from the beginning; the first 50 levels stay easy by previewing just one red box. Later levels mix one, two, and three red boxes. Easy moments keep the varied silhouette and reduce memory load. Tapping remains the main pleasure. Pattern families are connected, with seeded rotations/reflections, alternating sizes, and no consecutive family repeats. Fit both tall and wide patterns to the screen while retaining 48-pixel touch targets. Pace labels stay friendly: Easy, Gentle, Steady, Playful, Curious, Endless. Do not determine correctness from the current tile color.

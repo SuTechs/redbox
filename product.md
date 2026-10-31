@@ -8,7 +8,15 @@ Red Box is a cute, calming memory game for a small everyday break. Watch a few s
 
 Correctly tapped boxes also turn red. That is the playful twist: the player remembers what happened earlier instead of relying on the colors currently on screen.
 
-## How a round works
+## Normal and Zen
+
+Normal is the default game and increases board size, remembered red boxes, and preview speed. From level 10, some remembered/safe pairs visibly exchange positions after fading. Track the boxes, then tap the ones that never glowed. See [the progression plan](docs/plans/normal-and-zen.md) for the exact curve: up to 30 boxes, 10 remembered reds, six sequential swaps, and a 1.4-second standard preview at later levels. Extra time is available.
+
+Zen preserves the shipped relaxing game described below: 6–16-box silhouettes, one to three reds, easy moments, 3/5-second previews, and no shuffles. Choose Normal / Zen on Home or use the Zen mode switch in Settings. Each mode saves separate progress. Existing v1 levels migrate to Zen; Normal starts at 1.
+
+Reduced motion disables shuffling in Normal. If reduced motion changes during a timed phase, replay a visible preview rather than teleporting concealed boxes. No mode has a countdown while tapping, lives, ads, or a paywall.
+
+## How a Zen round works
 
 1. A beautiful arrangement of square boxes appears. The opening levels use 6, 8, 10, 12, and 9 boxes in different silhouettes.
 2. One or more boxes gently glow red for a few seconds. The first level shows one red box.
@@ -26,7 +34,7 @@ The red boxes are a set of positions to remember, not a sequence to repeat. All 
 - Taps are enabled only after the preview finishes and its red color has fully faded.
 - A box that glowed during the preview must never be tapped, even when it looks normal again.
 - A correctly selected box stays red and cannot count twice. Repeated taps on it do nothing.
-- The boxes keep the same positions throughout the round.
+- In Zen, boxes keep the same positions throughout the round. In Normal, input starts only after visible shuffles finish; remembered identities move with their boxes.
 - Winning means selecting every safe box, with no forbidden selections.
 - Every arrangement contains at least one forbidden box and at least one safe box.
 - Progress shows safe boxes selected, such as “2 of 3”. It does not reveal which boxes are safe.
@@ -44,7 +52,7 @@ Defaults for the first version:
 
 “Stress relief” describes the intended mood and experience; the game does not make health claims.
 
-## Levels and arrangements
+## Zen levels and arrangements
 
 The pleasure comes from tapping the boxes. Easy means a small memory load, not a small or repetitive board. Beautiful patterns with 6–16 square boxes appear from the beginning, independently of the red-box count.
 
@@ -90,7 +98,7 @@ Accessibility: comfortable text contrast, touch targets of at least 48 logical p
 
 Build for Android and iOS, portrait-first and offline. Include the core loop, gentle progression, curated layouts, tutorial, pause, retry, settings, and local storage for the current level and preferences. Exclude accounts, ads, purchases, leaderboards, and online features from the first version.
 
-Keep the originally red box IDs separate from the tapped box IDs. Determine correctness from the original set, never from a tile's visible color. Use explicit round states: ready → preview → fade → input → complete or retry.
+Keep the originally red box IDs separate from the tapped box IDs. Determine correctness from the original set, never from a tile's visible color. Use explicit round states: preview → fade → optional shuffle → input → complete or retry. The controller owns identity-to-slot mappings; do not infer correctness from current positions or colors.
 
 ## Delivery order
 
