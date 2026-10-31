@@ -23,14 +23,17 @@ class PocketPage extends StatelessWidget {
     required this.child,
     required this.minimumHeight,
     this.fillHeight = true,
+    this.backgroundColor,
   });
   final Widget child;
   final double minimumHeight;
   final bool fillHeight;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

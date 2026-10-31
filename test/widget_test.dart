@@ -89,7 +89,8 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 }
 
 Future<void> begin(WidgetTester tester) async {
-  final play = find.byKey(const ValueKey('play'));
+  final mode = tester.widget<RedBoxApp>(find.byType(RedBoxApp)).settings.mode;
+  final play = find.byKey(ValueKey(mode == PlayMode.zen ? 'play-zen' : 'play'));
   await tester.ensureVisible(play);
   await tapVisible(tester, play);
   await tester.pump();
@@ -111,35 +112,46 @@ List<int> tileIds(WidgetTester tester) => tester
     .toList();
 
 void main() {
-  testWidgets('Home switches modes and a Normal win unlocks only Normal', (
-    tester,
-  ) async {
-    final (settings, _) = await mount(tester, level: 7);
-    expect(settings.zenLevel, 7);
-    await tapVisible(tester, find.text('Normal'));
-    expect(settings.mode, PlayMode.normal);
-    expect(settings.level, 1);
-    await begin(tester);
-    final reds = tester
-        .widgetList<PocketTile>(find.byType(PocketTile))
-        .where((tile) => tile.red)
-        .map((tile) => tile.id)
-        .toSet();
-    expect(reds.length, 1);
-    await tester.pump(const Duration(seconds: 3));
-    for (final id in tileIds(tester).where((id) => !reds.contains(id))) {
-      await tapVisible(tester, find.byKey(ValueKey('box-$id')));
-    }
-    expect(find.text('Lovely!'), findsOneWidget);
-    expect(settings.normalLevel, 2);
-    expect(settings.zenLevel, 7);
-    await tapVisible(tester, find.byTooltip('Return home'));
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Zen'));
-    expect(settings.level, 7);
-    await tester.pumpWidget(const SizedBox());
-    settings.dispose();
-  });
+  testWidgets(
+    'Home lotus enters Zen and main Play resumes Normal independently',
+    (tester) async {
+      final (settings, _) = await mount(tester, level: 7);
+      expect(settings.zenLevel, 7);
+      expect(find.text('Normal'), findsNothing);
+      expect(find.text('Zen'), findsNothing);
+      await tapVisible(tester, find.byKey(const ValueKey('play-zen')));
+      expect(settings.mode, PlayMode.zen);
+      expect(find.text('Zen · Easy'), findsOneWidget);
+      expect(
+        tester.widget<PocketPage>(find.byType(PocketPage)).backgroundColor,
+        PocketColors.zenBackground,
+      );
+      await tapVisible(tester, find.byTooltip('Return home'));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.byKey(const ValueKey('play')));
+      expect(settings.mode, PlayMode.normal);
+      expect(settings.level, 1);
+      final reds = tester
+          .widgetList<PocketTile>(find.byType(PocketTile))
+          .where((tile) => tile.red)
+          .map((tile) => tile.id)
+          .toSet();
+      expect(reds.length, 1);
+      await tester.pump(const Duration(seconds: 3));
+      for (final id in tileIds(tester).where((id) => !reds.contains(id))) {
+        await tapVisible(tester, find.byKey(ValueKey('box-$id')));
+      }
+      expect(find.text('Lovely!'), findsOneWidget);
+      expect(settings.normalLevel, 2);
+      expect(settings.zenLevel, 7);
+      await tapVisible(tester, find.byTooltip('Return home'));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.byKey(const ValueKey('play-zen')));
+      expect(settings.level, 7);
+      await tester.pumpWidget(const SizedBox());
+      settings.dispose();
+    },
+  );
 
   testWidgets(
     'Settings switches Zen and the levels page follows that progress',
@@ -411,7 +423,7 @@ void main() {
     await tester.pump();
     expect(settings.sound, isFalse);
     expect(sounds.stops, 1);
-    await tapVisible(tester, find.text('5 seconds'));
+    await tapVisible(tester, find.text('Extra time'));
     await tester.pump();
     expect(settings.previewSeconds, 5);
     await tapVisible(tester, find.text('Warm keys'));
@@ -484,7 +496,9 @@ void main() {
       expect(find.text('Watch the red box'), findsOneWidget);
       await tapVisible(tester, find.byTooltip('Return home'));
       await tester.pumpAndSettle();
-      expect(find.text('Continue'), findsOneWidget);
+      expect(find.text("Let's play"), findsOneWidget);
+      expect(settings.zenLevel, 2);
+      expect(settings.normalLevel, 1);
       await tester.pumpWidget(const SizedBox());
       settings.dispose();
     },

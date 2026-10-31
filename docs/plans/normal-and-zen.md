@@ -8,8 +8,11 @@ prepares the next app version and does not submit a store release.
 
 ## Modes and progress
 
-- New installs start in Normal. Home offers Normal / Zen, and Settings has a
-  Zen mode switch. The current mode is visible on Home, Levels, and the board.
+- The main Play action opens Normal. A lotus icon beside Settings on Home
+  launches Zen directly; Home has no text mode selector. Zen uses a soft sage
+  background and lotus badge. The level browser follows the last-played track,
+  with a Zen mode switch in its Settings. The active track is visible on Levels
+  and the board.
 - Each mode has its own unlocked level. Existing v1 `level` migrates to Zen;
   Normal starts at level 1. Audio and comfort preferences survive migration.
 - The mode is fixed during a round; change it from Home or Levels. A paused

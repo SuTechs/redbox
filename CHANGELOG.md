@@ -5,7 +5,7 @@
 ### Added
 
 - Play Normal mode with progressively larger boards, more red boxes to remember, shorter previews, and visible shuffles from level 10.
-- Choose Zen mode for the original relaxed game. Switch modes on Home or in Settings, with separate saved progress.
+- Choose Zen mode for the original relaxed game. Enter Zen through the lotus icon beside Settings; the main Play action opens Normal. Each mode has separate saved progress.
 - Use Extra time or reduced motion for a more comfortable challenge; reduced motion disables shuffles.
 
 ### Changed

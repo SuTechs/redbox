@@ -12,7 +12,7 @@ Correctly tapped boxes also turn red. That is the playful twist: the player reme
 
 Normal is the default game and increases board size, remembered red boxes, and preview speed. From level 10, some remembered/safe pairs visibly exchange positions after fading. Track the boxes, then tap the ones that never glowed. See [the progression plan](docs/plans/normal-and-zen.md) for the exact curve: up to 30 boxes, 10 remembered reds, six sequential swaps, and a 1.4-second standard preview at later levels. Extra time is available.
 
-Zen preserves the shipped relaxing game described below: 6–16-box silhouettes, one to three reds, easy moments, 3/5-second previews, and no shuffles. Choose Normal / Zen on Home or use the Zen mode switch in Settings. Each mode saves separate progress. Existing v1 levels migrate to Zen; Normal starts at 1.
+Zen preserves the shipped relaxing game described below: 6–16-box silhouettes, one to three reds, easy moments, 3/5-second previews, and no shuffles. Use the main Play action for Normal or the lotus icon beside Settings on Home for Zen. Zen has a soft sage surface and lotus badge. The level browser follows your last-played mode; switch tracks in its Settings. Each mode saves separate progress. Existing v1 levels migrate to Zen; Normal starts at 1.
 
 Reduced motion disables shuffling in Normal. If reduced motion changes during a timed phase, replay a visible preview rather than teleporting concealed boxes. No mode has a countdown while tapping, lives, ads, or a paywall.
 

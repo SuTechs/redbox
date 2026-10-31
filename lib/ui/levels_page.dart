@@ -149,6 +149,9 @@ class _LevelsPageState extends State<LevelsPage> {
       final pace = LevelPace.forLevel(_firstLevel);
       final currentChapter = (widget.settings.level - 1) ~/ _chapterSize;
       return Scaffold(
+        backgroundColor: widget.settings.mode == PlayMode.zen
+            ? PocketColors.zenBackground
+            : null,
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(

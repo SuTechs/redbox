@@ -260,6 +260,9 @@ class _GamePageState extends State<GamePage>
         ),
       );
       return PocketPage(
+        backgroundColor: _mode == PlayMode.zen
+            ? PocketColors.zenBackground
+            : null,
         fillHeight: fillHeight,
         minimumHeight:
             _boardMetrics(context, _game.round.layout).$3 +
@@ -295,9 +298,29 @@ class _GamePageState extends State<GamePage>
               ],
             ),
             SizedBox(height: compact ? 4 : 8),
-            Text(
-              '${_mode.label} · ${_game.round.difficultyLabel}',
-              style: PocketType.body.copyWith(fontSize: 12),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_mode == PlayMode.zen) ...[
+                  const Icon(
+                    Icons.spa_outlined,
+                    size: 16,
+                    color: PocketColors.zenInk,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Flexible(
+                  child: Text(
+                    '${_mode.label} · ${_game.round.difficultyLabel}',
+                    style: PocketType.body.copyWith(
+                      fontSize: 12,
+                      color: _mode == PlayMode.zen
+                          ? PocketColors.zenInk
+                          : PocketColors.muted,
+                    ),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: compact ? 16 : 24),
             Semantics(

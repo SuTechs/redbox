@@ -8,7 +8,6 @@ import '../core/music.dart';
 import '../core/sound.dart';
 import '../game/round.dart';
 import 'game_page.dart';
-import 'mode_selector.dart';
 import 'help_and_settings.dart';
 import 'levels_page.dart';
 import 'pocket_theme.dart';
@@ -24,6 +23,21 @@ class HomePage extends StatelessWidget {
   final AppSettings settings;
   final SoundEffects sounds;
   final RoundGenerator generator;
+
+  void _play(BuildContext context, PlayMode mode) {
+    if (settings.mode != mode) settings.update(mode: mode);
+    unawaited(MusicScope.of(context).activate());
+    unawaited(sounds.play(GameCue.continueRound));
+    if (settings.haptics) unawaited(HapticFeedback.selectionClick());
+    Navigator.push(
+      context,
+      pocketRoute<void>(
+        context,
+        GamePage(settings: settings, sounds: sounds, generator: generator),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: settings,
@@ -33,7 +47,7 @@ class HomePage extends StatelessWidget {
               MediaQuery.paddingOf(context).vertical <
           700;
       return PocketPage(
-        minimumHeight: compact ? 620 : 770,
+        minimumHeight: compact ? 600 : 670,
         fillHeight: MediaQuery.textScalerOf(context).scale(16) <= 16,
         child: Column(
           children: [
@@ -41,11 +55,31 @@ class HomePage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Flexible(child: PocketWordmark()),
-                IconButton(
-                  tooltip: 'Settings',
-                  onPressed: () =>
-                      showPocketSettings(context, settings, sounds),
-                  icon: const Icon(Icons.tune_rounded),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      key: const ValueKey('play-zen'),
+                      tooltip: 'Play Zen mode',
+                      onPressed: () => _play(context, PlayMode.zen),
+                      style: IconButton.styleFrom(
+                        foregroundColor: PocketColors.zenInk,
+                        backgroundColor: PocketColors.zenSurface,
+                      ),
+                      icon: const Icon(Icons.spa_outlined),
+                    ),
+                    IconButton(
+                      tooltip: 'Settings',
+                      onPressed: () => showPocketSettings(
+                        context,
+                        settings,
+                        sounds,
+                        showModeSetting: false,
+                        previewMode: PlayMode.normal,
+                      ),
+                      icon: const Icon(Icons.tune_rounded),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -79,49 +113,23 @@ class HomePage extends StatelessWidget {
               const Spacer(flex: 2)
             else
               const SizedBox(height: 32),
-            ModeSelector(settings: settings),
-            const SizedBox(height: 6),
-            Text(
-              settings.mode.description,
-              style: PocketType.body.copyWith(fontSize: 12),
-            ),
-            const SizedBox(height: 18),
-            if (settings.level > 1) ...[
+            if (settings.normalLevel > 1) ...[
               Text(
-                'Your next little win · Level ${settings.level}',
+                'Your next little win · Level ${settings.normalLevel}',
                 style: PocketType.body.copyWith(fontSize: 13),
               ),
               const SizedBox(height: 13),
             ],
             PocketButton(
               key: const ValueKey('play'),
-              label: settings.level > 1 ? 'Continue' : "Let's play",
+              label: settings.normalLevel > 1 ? 'Continue' : "Let's play",
               icon: Icons.arrow_forward_rounded,
-              onPressed: () {
-                unawaited(MusicScope.of(context).activate());
-                unawaited(sounds.play(GameCue.continueRound));
-                if (settings.haptics) {
-                  unawaited(HapticFeedback.selectionClick());
-                }
-                Navigator.push(
-                  context,
-                  pocketRoute<void>(
-                    context,
-                    GamePage(
-                      settings: settings,
-                      sounds: sounds,
-                      generator: generator,
-                    ),
-                  ),
-                );
-              },
+              onPressed: () => _play(context, PlayMode.normal),
             ),
             const SizedBox(height: 14),
             PocketButton(
               key: const ValueKey('browse-levels'),
-              label: settings.mode == PlayMode.zen
-                  ? 'Little steps · Levels'
-                  : 'Challenges · Levels',
+              label: 'Little steps · Levels',
               icon: Icons.grid_view_rounded,
               secondary: true,
               onPressed: () {

@@ -103,12 +103,12 @@ void main() {
     settings.update(mode: PlayMode.zen);
     await mount();
     await tester.pumpAndSettle();
-    await tap(find.byKey(const ValueKey('play')));
+    await tap(find.byKey(const ValueKey('play-zen')));
     await tester.pump(const Duration(milliseconds: 240));
     await save('docs/difficulty/05-zen-preview.png');
-    await tap(find.byTooltip('Return home'));
+    await tap(find.byTooltip('Pause game'));
     await tester.pumpAndSettle();
-    await tap(find.byTooltip('Settings'));
+    await tap(find.text('Music & sound'));
     await tester.pumpAndSettle();
     await save('docs/difficulty/06-zen-settings.png');
     await tester.pumpWidget(const SizedBox());
