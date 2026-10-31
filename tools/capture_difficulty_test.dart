@@ -33,7 +33,7 @@ void main() {
 
     final frame = GlobalKey();
     final settings = AppSettings(store: MemorySettingsStore())
-      ..normalLevel = 10
+      ..normalLevel = 20
       ..zenLevel = 73
       ..haptics = false;
     Future<void> mount() => tester.pumpWidget(
@@ -71,11 +71,16 @@ void main() {
     await mount();
     await tester.pumpAndSettle();
     await save('docs/difficulty/01-mode-home.png');
+    await tap(find.byKey(const ValueKey('browse-levels')));
+    await tester.pumpAndSettle();
+    await save('docs/difficulty/08-level-shapes.png');
+    await tap(find.byTooltip('Return home'));
+    await tester.pumpAndSettle();
     await tap(find.byKey(const ValueKey('play')));
     await tester.pump(const Duration(milliseconds: 240));
     await save('docs/difficulty/02-normal-preview.png');
     await save('release-private/difficulty-frames/00.png');
-    await tester.pump(const Duration(milliseconds: 2160));
+    await tester.pump(const Duration(milliseconds: 2760));
     for (var step = 0; step < 4; step++) {
       await save(
         'release-private/difficulty-frames/${(step + 1).toString().padLeft(2, '0')}.png',
@@ -93,7 +98,14 @@ void main() {
     await save('release-private/difficulty-frames/16.png');
 
     await tester.pumpWidget(const SizedBox());
-    settings.normalLevel = 150;
+    settings.normalLevel = 1;
+    await mount();
+    await tester.pumpAndSettle();
+    await tap(find.byKey(const ValueKey('play')));
+    await tester.pump(const Duration(milliseconds: 240));
+    await save('docs/difficulty/09-first-step.png');
+    await tester.pumpWidget(const SizedBox());
+    settings.normalLevel = 400;
     await mount();
     await tester.pumpAndSettle();
     await tap(find.byKey(const ValueKey('play')));

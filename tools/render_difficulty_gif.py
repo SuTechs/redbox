@@ -21,7 +21,7 @@ def main():
             OUTPUT,
             save_all=True,
             append_images=frames[1:],
-            duration=[2160] + [70] * 4 + [65] * 10 + [180, 1000],
+            duration=[2760] + [70] * 4 + [65] * 10 + [180, 1000],
             loop=0,
             disposal=2,
         )

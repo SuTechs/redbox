@@ -9,8 +9,8 @@ prepares the next app version and does not submit a store release.
 ## Modes and progress
 
 - The main Play action opens Normal. A lotus icon beside Settings on Home
-  launches Zen directly; Home has no text mode selector. Zen uses a soft sage
-  background and lotus badge. The level browser follows the last-played track,
+  launches Zen directly; Home has no text mode selector. Zen keeps the warm cream
+  background, with sage accents and a lotus badge. The level browser follows the last-played track,
   with a Zen mode switch in its Settings. The active track is visible on Levels
   and the board.
 - Each mode has its own unlocked level. Existing v1 `level` migrates to Zen;
@@ -24,17 +24,53 @@ prepares the next app version and does not submit a store release.
 
 | Levels | Board sizes | Red boxes | Preview | Sequential pair swaps |
 | --- | --- | --- | --- | --- |
-| 1 | 8 | 1 | 3s | 0 |
-| 2–4 | 10–12 | 2 | 3s | 0 |
-| 5–9 | 12–16 | 3 | 2.6s | 0 |
-| 10–19 | 16–18 | 4 | 2.4s | 1 |
-| 20–29 | 18–22 | 5 | 2.2s | 2 |
-| 30–39 | 20–24 | 6 | 2s | 2 |
-| 40–59 | 22–26 | 6 | 2s | 3 |
-| 60–79 | 24–28 | 7 | 1.8s | 4 |
-| 80–99 | 26–28 | 8 | 1.6s | 4 |
-| 100–149 | 26–30 | 8 | 1.6s | 5 |
-| 150+ | 26–30 | 10 | 1.4s | 6 |
+| 1 | 4 | 1 | 3s | 0 |
+| 2 | 5 | 1 | 3s | 0 |
+| 3–4 | 6 | 2 | 3s | 0 |
+| 5 | 7 | 2 | 3s | 0 |
+| 6–7 | 8 | 3 | 3s | 0 |
+| 8–9 | 9 | 3 | 3s | 0 |
+| 10 | 10 | 4 | 3s | 0 |
+| 11–19 | 10–12 | 4 | 3s | 0 |
+| 20–29 | 12 | 4 | 3s | 1 |
+| 30–39 | 12–14 | 5 | 2.8s | 1 |
+| 40–49 | 14 | 5 | 2.8s | 2 |
+| 50–69 | 14–16 | 6 | 2.6s | 2 |
+| 70–89 | 16–18 | 7 | 2.6s | 2 |
+| 90–119 | 18 | 7 | 2.4s | 3 |
+| 120–159 | 18–20 | 8 | 2.4s | 3 |
+| 160–219 | 20 | 8 | 2.2s | 4 |
+| 220–299 | 20–22 | 9 | 2.2s | 4 |
+| 300–399 | 22 | 9 | 2s | 5 |
+| 400+ | 22–24 | 10 | 1.8s | 5 |
+
+### Rebalance rationale
+
+Normal teaches with a four-box round, then grows memory density before adding
+movement. Only the first two rounds have one red. Every round has at least 20%
+reds and no more than 14 safe taps. The first shuffle keeps the familiar four
+reds and three-second preview; later tiers alternate practice, extra memory,
+and movement. Small board-size variations give the curve a rhythm rather than
+making every next level strictly larger.
+
+This is a design hypothesis informed by competence and autonomy in
+[game-engagement research](https://selfdeterminationtheory.org/SDT/documents/2010_PrzybylskiRigbyRyan_ROGP.pdf),
+not a validated psychological outcome. No failure penalties or tapping timer;
+Extra time, reduced motion and Zen remain player choices. Playtest the opening,
+first shuffle and late tiers with new and experienced players before release.
+
+### Level identity
+
+A level number and seed determine its silhouette and difficulty. Retrying changes
+red positions and the legal shuffle plan, never the silhouette. A seeded family
+deck avoids adjacent repeats; silhouette previews and red counts appear on each
+level card without revealing the upcoming red positions. The chapter summary
+shows its current (or nearest boundary) level's actual shape and challenge, replacing the
+repeated “A growing challenge” copy. Shape names also appear above Normal play.
+
+Endless levels cannot have infinitely unique silhouettes within a finite phone
+grid: families recur, with stable orientations and changing rules. We promise
+recognizable, reproducible levels and variety, not mathematical global uniqueness.
 
 Level numbers remain endless. The curve caps to keep targets tappable and
 previews usable; seeded silhouettes/orientations and random remembered boxes
@@ -89,7 +125,7 @@ between players.
 
 ## Verification results — 31 October 2026
 
-- All 69 Flutter tests pass, including legacy Zen regressions and Normal mode,
+- The initial 69 Flutter tests passed, including legacy Zen regressions and Normal mode,
   migration, shuffled identities, mid-shuffle reduced motion, rotation,
   320×568 previews with safe-area padding, 568×320 landscape, and system text
   scales 1.2, 1.4, 1.8 and 2.0. Real-font small-phone tests also verify that
@@ -101,3 +137,21 @@ between players.
   resolved and regression-tested; no outstanding actionable findings remain.
 - Physical-device playtesting and store upload remain part of the release process
   after reviewing this PR.
+
+### Follow-up review
+
+The October 31 feedback changes the opening to 4–10 boxes, defers shuffling to
+20, and restores cream behind Zen's lotus/sage accents. Added checks cover the
+opening sequence, safe-tap budget, memory density, adjacent silhouettes across
+4,000 seeded levels, and accurate chapter guidance at small-screen/large-text sizes.
+New captures include the actual level browser and the first four-box round.
+
+Visual review also found that a shuffle arc could leave the screen at the right
+edge. Both paths now receive the same inward translation, preserving their
+separation while keeping their tile faces inside the board. A frame-by-frame
+small-phone widget test covers this case.
+
+Final follow-up verification: all 72 Flutter tests pass; formatter and analyzer
+are clean. Release web, signed Android App Bundle, and iOS simulator builds pass.
+The real-widget capture test passes, and refreshed PNGs plus the regenerated
+shuffle GIF show the final curve, level cards, warm Zen palette and edge fix.

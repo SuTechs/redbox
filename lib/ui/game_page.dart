@@ -311,7 +311,7 @@ class _GamePageState extends State<GamePage>
                 ],
                 Flexible(
                   child: Text(
-                    '${_mode.label} · ${_game.round.difficultyLabel}',
+                    '${_mode == PlayMode.zen ? 'Zen' : _game.round.layout.name} · ${_game.round.difficultyLabel}',
                     style: PocketType.body.copyWith(
                       fontSize: 12,
                       color: _mode == PlayMode.zen
@@ -492,7 +492,24 @@ class _Board extends StatelessWidget {
                 : Offset(-delta.dy, delta.dx) /
                       delta.distance *
                       (math.sin(math.pi * progress) * tile * .52);
-            final offset = Offset.lerp(from, to, progress)! + arc;
+            final point = Offset.lerp(from, to, progress)! + arc;
+            final partner = Offset.lerp(to, from, progress)! - arc;
+            // Shift both paths together at an edge. Independent clamping
+            // would squeeze the paths together and hide tile identities.
+            double correction(double a, double b, double limit) {
+              final low = math.min(a, b);
+              final high = math.max(a, b);
+              if (low < 0) return -low;
+              if (high > limit) return limit - high;
+              return 0;
+            }
+
+            final offset =
+                point +
+                Offset(
+                  correction(point.dx, partner.dx, width - tile),
+                  correction(point.dy, partner.dy, height - tile),
+                );
             return Positioned(
               key: ValueKey('tile-position-$id'),
               left: offset.dx,

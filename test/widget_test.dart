@@ -177,11 +177,52 @@ void main() {
   );
 
   testWidgets(
+    'Level browser shows real shapes, counts and chapter-specific guidance',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 1.4;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final semantics = tester.ensureSemantics();
+      final (settings, _) = await mount(tester, mode: PlayMode.normal);
+      await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('First steps · Little square'),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('4 boxes · 1 to remember · 3 to tap'),
+        findsOneWidget,
+      );
+      expect(find.text('A growing challenge'), findsNothing);
+      await showLevel(tester, 1);
+      expect(
+        find.bySemanticsLabel(
+          RegExp('Level 1, Little square, 4 boxes, 1 red, ready to play'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('1 red'), findsWidgets);
+      await tapVisible(tester, find.byTooltip('Next 50 levels'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Building rhythm ·'), findsOneWidget);
+      expect(find.textContaining('Level 51 ·'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      semantics.dispose();
+      settings.dispose();
+    },
+  );
+
+  testWidgets(
     'A visible shuffle moves square boxes, hides red and locks taps',
     (tester) async {
       final (settings, _) = await mount(
         tester,
-        level: 10,
+        level: 20,
         mode: PlayMode.normal,
         reducedMotion: false,
       );
@@ -191,7 +232,7 @@ void main() {
           .firstWhere((tile) => tile.red)
           .id;
       final original = tester.getRect(find.byKey(ValueKey('box-$red')));
-      await tester.pump(const Duration(milliseconds: 2400));
+      await tester.pump(const Duration(milliseconds: 3000));
       await tester.pump(const Duration(milliseconds: 280));
       expect(find.text('Follow the boxes'), findsOneWidget);
       expect(
@@ -215,6 +256,47 @@ void main() {
       );
       await tapVisible(tester, find.byKey(ValueKey('box-$red')));
       expect(find.text("Let's try that again"), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      settings.dispose();
+    },
+  );
+
+  testWidgets(
+    'Edge shuffle paths keep every tile inside the board on a phone',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final (settings, _) = await mount(
+        tester,
+        level: 20,
+        mode: PlayMode.normal,
+        reducedMotion: false,
+      );
+      await begin(tester);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 280));
+      final board = tester
+          .getRect(find.byKey(const ValueKey('game-board')))
+          .inflate(.01);
+      for (var frame = 0; frame <= 10; frame++) {
+        for (final id in tileIds(tester)) {
+          final rect = tester.getRect(find.byKey(ValueKey('box-$id')));
+          expect(
+            board.contains(rect.topLeft),
+            isTrue,
+            reason: 'Tile $id at frame $frame',
+          );
+          expect(
+            board.contains(rect.bottomRight),
+            isTrue,
+            reason: 'Tile $id at frame $frame',
+          );
+        }
+        await tester.pump(const Duration(milliseconds: 65));
+      }
+      expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       settings.dispose();
     },
@@ -244,12 +326,12 @@ void main() {
     (tester) async {
       final (settings, _) = await mount(
         tester,
-        level: 10,
+        level: 20,
         mode: PlayMode.normal,
         reducedMotion: false,
       );
       await begin(tester);
-      await tester.pump(const Duration(milliseconds: 2400));
+      await tester.pump(const Duration(milliseconds: 3000));
       await tester.pump(const Duration(milliseconds: 280));
       expect(find.text('Follow the boxes'), findsOneWidget);
       settings.update(reducedMotion: true);
@@ -262,7 +344,7 @@ void main() {
             .length,
         4,
       );
-      await tester.pump(const Duration(milliseconds: 2400));
+      await tester.pump(const Duration(milliseconds: 3000));
       expect(find.text('Tap the others'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       settings.dispose();
@@ -351,7 +433,7 @@ void main() {
       addTearDown(tester.view.resetPadding);
       final (settings, _) = await mount(
         tester,
-        level: 150,
+        level: 400,
         mode: PlayMode.normal,
       );
       await begin(tester);
@@ -369,7 +451,7 @@ void main() {
         expect(rect.top, greaterThanOrEqualTo(20));
         expect(rect.bottom, lessThanOrEqualTo(320));
       }
-      await tester.pump(const Duration(milliseconds: 1400));
+      await tester.pump(const Duration(milliseconds: 1800));
       expect(find.text('Tap the others'), findsOneWidget);
       tester.view.physicalSize = const Size(320, 568);
       await tester.pump();
@@ -679,7 +761,7 @@ void main() {
       await showLevel(tester, 9951);
       final tile = tester.getSize(find.byKey(const ValueKey('level-9951')));
       expect(tile.width, greaterThanOrEqualTo(48));
-      expect(tile.height, closeTo(tile.width, .01));
+      expect(tile.height, greaterThanOrEqualTo(48));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
       settings.dispose();

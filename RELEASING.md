@@ -6,7 +6,7 @@ Source version: **1.1.0+2**. Android application ID and iOS bundle ID: **com.sut
 
 This version adds progressive Normal mode and preserves the original game as Zen, with separate saved progress. The [difficulty plan](docs/plans/normal-and-zen.md) records the curve, fairness rules, and completed build checks; [CHANGELOG.md](CHANGELOG.md) lists the player-facing changes. Store upload and publication remain separate release steps.
 
-- Playtest Normal levels 1, 10, and 150 on physical Android and iOS devices: preview timing, visible swaps, locked input during movement, Extra time, and app/device reduced motion.
+- Playtest Normal levels 1, 10, 20, 50, and 400 on physical Android and iOS devices: preview timing, visible swaps, locked input during movement, Extra time, and app/device reduced motion.
 - Upgrade an existing 1.0.0 installation and verify its level appears in Zen, Normal starts at 1, each mode advances independently, and audio/comfort preferences survive.
 - Check pause/resume, backgrounding, rotation, and whole-board visibility on short screens and with larger text.
 - Refresh store descriptions, release notes, and screenshots before uploading. Existing listing copy and marketing captures describe the original game, now Zen; the new mode previews live in `docs/difficulty/`.
@@ -104,6 +104,6 @@ flutter test tools/capture_difficulty_test.dart
 python3 tools/render_difficulty_gif.py
 ```
 
-The store capture test deliberately uses Zen. The difficulty capture test uses sample progress in memory, exports six real Flutter PNGs under `docs/difficulty/`, and saves timed frames under ignored `release-private/difficulty-frames/`; the GIF exporter writes `docs/difficulty/shuffle.gif`. Neither capture changes player data.
+The store capture test deliberately uses Zen. The difficulty capture test uses sample progress in memory, exports nine real Flutter PNGs under `docs/difficulty/`, and saves timed frames under ignored `release-private/difficulty-frames/`; the GIF exporter writes `docs/difficulty/shuffle.gif`. Neither capture changes player data.
 
 Brand source and the image-generation prompt are in [assets/brand/README.md](assets/brand/README.md). Design reference and gameplay specification remain in [DESIGN.md](DESIGN.md) and [product.md](product.md).

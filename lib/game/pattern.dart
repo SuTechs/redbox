@@ -82,7 +82,7 @@ class _PatternTemplate {
   int get boxCount => mask.join().split('').where((cell) => cell == '#').length;
 }
 
-/// Larger, reproducible Normal boards. Zen's [patternForLevel] stays unchanged.
+/// Small-to-large, reproducible Normal boards. Zen's [patternForLevel] stays unchanged.
 BoardLayout normalPatternForLevel(
   int level, {
   required int boxCount,
@@ -97,7 +97,17 @@ BoardLayout normalPatternForLevel(
     throw ArgumentError.value(boxCount, 'boxCount', 'Unsupported board size');
   }
   final random = _PatternRandom(seed + level * 97);
-  final template = candidates[random.nextInt(candidates.length)];
+  // Cycle a seeded family deck, rather than independently rolling a family.
+  // Adjacent levels with the same size visit different families when available.
+  final familyOrder = List.generate(candidates.length, (index) => index);
+  final deck = _PatternRandom(seed + boxCount * 31);
+  for (var i = familyOrder.length - 1; i > 0; i--) {
+    final j = deck.nextInt(i + 1);
+    final value = familyOrder[i];
+    familyOrder[i] = familyOrder[j];
+    familyOrder[j] = value;
+  }
+  final template = candidates[familyOrder[(level - 1) % candidates.length]];
   var mask = template.mask.toList();
   if (random.nextInt(2) == 1) mask = mask.reversed.toList();
   if (random.nextInt(2) == 1) {
@@ -122,6 +132,42 @@ BoardLayout normalPatternForLevel(
 }
 
 const _normalPatterns = [
+  _PatternTemplate('Little square', ['##', '##']),
+  _PatternTemplate('Sprout', ['.#.', '###', '.#.']),
+  _PatternTemplate('Little step', ['##.', '###', '..#']),
+  _PatternTemplate('Tiny arch', ['###', '#.#', '#.#']),
+  _PatternTemplate('Kite', ['.#.', '###', '###', '.#.']),
+  _PatternTemplate('Nine patch', ['###', '###', '###']),
+  _PatternTemplate('Ribbon fold', ['###.', '####', '.###']),
+  _PatternTemplate('Open window', ['####', '#..#', '####', '.##.']),
+  _PatternTemplate('Garden gate', ['####', '####', '##.#', '.###']),
+  _PatternTemplate('Tulip', ['#.#.#', '#####', '.###.', '.###.', '..#..']),
+  _PatternTemplate('Paper boat', ['..#..', '.###.', '#####', '#####', '.###.']),
+  _PatternTemplate('Soft canopy', [
+    '.###.',
+    '#####',
+    '#####',
+    '.###.',
+    '.###.',
+  ]),
+  _PatternTemplate('Woven path', ['.###.', '#####', '#####', '#####', '.###.']),
+  _PatternTemplate('Petal frame', [
+    '.###.',
+    '#####',
+    '##.##',
+    '#####',
+    '.###.',
+  ]),
+  _PatternTemplate('Courtyard', ['.###.', '#####', '#####', '#####', '####.']),
+  _PatternTemplate('Long arch', ['.###.', '#####', '#####', '#####', '#####']),
+  _PatternTemplate('Leaf window', [
+    '.###.',
+    '#####',
+    '#####',
+    '#####',
+    '.###.',
+    '.###.',
+  ]),
   _PatternTemplate('Tall diamond', [
     '..#..',
     '.###.',
@@ -129,6 +175,21 @@ const _normalPatterns = [
     '#####',
     '.###.',
     '..#..',
+  ]),
+  _PatternTemplate('Twin steps', [
+    '###..',
+    '####.',
+    '.####',
+    '..###',
+    '..###',
+    '...#.',
+  ]),
+  _PatternTemplate('Rounded terrace', [
+    '.###.',
+    '#####',
+    '#####',
+    '#####',
+    '.##..',
   ]),
   _PatternTemplate('Long leaf', [
     '.###.',

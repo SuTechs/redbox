@@ -33,12 +33,12 @@ Red Box is a warm, tactile memory game with two ways to play: **Normal** builds 
 
 ## Two ways to play
 
-- **Normal:** starts with 8 boxes and one red, then builds to 26–30 boxes, up to 10 reds, shorter previews, and up to six visible pair swaps. Shuffles begin at level 10. The curve caps at a playable challenge; the levels keep going.
+- **Normal:** starts with 4 boxes and one red, grows to 10 boxes across the first ten levels, and eventually reaches 22–24 boxes, up to 10 reds, shorter previews, and up to five visible pair swaps. Shuffles begin at level 20. The curve caps at a playable challenge; the levels keep going.
 - **Zen:** the original relaxed experience — varied 6–16-box shapes, one to three reds, 3/5-second previews, easy moments, and no shuffles.
 
-The main Play button opens Normal. Tap the **lotus icon beside Settings** to jump straight into Zen, with a soft sage background and lotus badge. The level browser follows your last-played mode; its Settings let you switch tracks. Each mode saves its own progress. Updating from v1 preserves your old levels in Zen and starts Normal at level 1. Reduced motion disables shuffles, and **Extra time** offers longer Normal previews. There is no countdown while tapping in either mode.
+The main Play button opens Normal. Tap the **lotus icon beside Settings** to jump straight into Zen, with warm cream, sage accents, and a lotus badge. The level browser follows your last-played mode; its Settings let you switch tracks. Each mode saves its own progress. Updating from v1 preserves your old levels in Zen and starts Normal at level 1. Reduced motion disables shuffles, and **Extra time** offers longer Normal previews. There is no countdown while tapping in either mode.
 
-The [difficulty plan](docs/plans/normal-and-zen.md) records the curve and fairness rules. [Normal preview](docs/difficulty/02-normal-preview.png), [shuffle](docs/difficulty/shuffle.gif), and [late Normal board](docs/difficulty/04-normal-expert.png) show the real Flutter UI. Regenerate with `flutter test tools/capture_difficulty_test.dart` followed by `python3 tools/render_difficulty_gif.py` (requires Pillow).
+The [difficulty plan](docs/plans/normal-and-zen.md) records the curve and fairness rules. [First level](docs/difficulty/09-first-step.png), [level browser](docs/difficulty/08-level-shapes.png), [Normal preview](docs/difficulty/02-normal-preview.png), [shuffle](docs/difficulty/shuffle.gif), and [late Normal board](docs/difficulty/04-normal-expert.png) show the real Flutter UI. Regenerate with `flutter test tools/capture_difficulty_test.dart` followed by `python3 tools/render_difficulty_gif.py` (requires Pillow).
 
 ## The little things
 
