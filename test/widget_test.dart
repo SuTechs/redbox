@@ -47,10 +47,13 @@ Future<(AppSettings, RecordingSounds)> mount(
   WidgetTester tester, {
   int level = 1,
   double scale = 1,
+  PlayMode mode = PlayMode.zen,
+  bool reducedMotion = true,
 }) async {
   final settings = AppSettings(store: MemorySettingsStore())
+    ..mode = mode
     ..level = level
-    ..reducedMotion = true
+    ..reducedMotion = reducedMotion
     ..haptics = false;
   final sounds = RecordingSounds();
   await tester.pumpWidget(
@@ -107,6 +110,271 @@ List<int> tileIds(WidgetTester tester) => tester
     .toList();
 
 void main() {
+  testWidgets('Home switches modes and a Normal win unlocks only Normal', (
+    tester,
+  ) async {
+    final (settings, _) = await mount(tester, level: 7);
+    expect(settings.zenLevel, 7);
+    await tapVisible(tester, find.text('Normal'));
+    expect(settings.mode, PlayMode.normal);
+    expect(settings.level, 1);
+    await begin(tester);
+    final reds = tester
+        .widgetList<PocketTile>(find.byType(PocketTile))
+        .where((tile) => tile.red)
+        .map((tile) => tile.id)
+        .toSet();
+    expect(reds.length, 1);
+    await tester.pump(const Duration(seconds: 3));
+    for (final id in tileIds(tester).where((id) => !reds.contains(id))) {
+      await tapVisible(tester, find.byKey(ValueKey('box-$id')));
+    }
+    expect(find.text('Lovely!'), findsOneWidget);
+    expect(settings.normalLevel, 2);
+    expect(settings.zenLevel, 7);
+    await tapVisible(tester, find.byTooltip('Return home'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Zen'));
+    expect(settings.level, 7);
+    await tester.pumpWidget(const SizedBox());
+    settings.dispose();
+  });
+
+  testWidgets(
+    'Settings switches Zen and the levels page follows that progress',
+    (tester) async {
+      final (settings, _) = await mount(tester, level: 73);
+      await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
+      await tester.pumpAndSettle();
+      expect(find.text('ZEN LEVELS'), findsOneWidget);
+      expect(find.text('51–100'), findsOneWidget);
+      await tapVisible(tester, find.byTooltip('Settings'));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.widgetWithText(SwitchListTile, 'Zen mode'));
+      await tapVisible(tester, find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+      expect(settings.mode, PlayMode.normal);
+      expect(find.text('NORMAL LEVELS'), findsOneWidget);
+      expect(find.text('1–50'), findsOneWidget);
+      expect(find.text('Play level 1'), findsOneWidget);
+      expect(find.text('Easy moments every 5 levels'), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      settings.dispose();
+    },
+  );
+
+  testWidgets(
+    'A visible shuffle moves square boxes, hides red and locks taps',
+    (tester) async {
+      final (settings, _) = await mount(
+        tester,
+        level: 10,
+        mode: PlayMode.normal,
+        reducedMotion: false,
+      );
+      await begin(tester);
+      final red = tester
+          .widgetList<PocketTile>(find.byType(PocketTile))
+          .firstWhere((tile) => tile.red)
+          .id;
+      final original = tester.getRect(find.byKey(ValueKey('box-$red')));
+      await tester.pump(const Duration(milliseconds: 2400));
+      await tester.pump(const Duration(milliseconds: 280));
+      expect(find.text('Follow the boxes'), findsOneWidget);
+      expect(
+        tester
+            .widgetList<PocketTile>(find.byType(PocketTile))
+            .every((tile) => tile.onTap == null && !tile.red),
+        isTrue,
+      );
+      // The animation has its own frames before the settling interval ends.
+      await tester.pump(const Duration(milliseconds: 325));
+      final moved = tester.getRect(find.byKey(ValueKey('box-$red')));
+      expect(moved.topLeft, isNot(original.topLeft));
+      expect(moved.width, closeTo(moved.height, .01));
+      await tester.pump(const Duration(milliseconds: 505));
+      expect(find.text('Tap the others'), findsOneWidget);
+      expect(
+        tester
+            .widgetList<PocketTile>(find.byType(PocketTile))
+            .every((tile) => tile.onTap != null),
+        isTrue,
+      );
+      await tapVisible(tester, find.byKey(ValueKey('box-$red')));
+      expect(find.text("Let's try that again"), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      settings.dispose();
+    },
+  );
+
+  testWidgets('An active round cannot change modes in pause settings', (
+    tester,
+  ) async {
+    final (settings, _) = await mount(tester, mode: PlayMode.normal);
+    await begin(tester);
+    await tapVisible(tester, find.byTooltip('Pause game'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Music & sound'));
+    await tester.pumpAndSettle();
+    final toggle = tester.widget<SwitchListTile>(
+      find.widgetWithText(SwitchListTile, 'Zen mode'),
+    );
+    expect(toggle.onChanged, isNull);
+    expect(find.text('Return home to change modes'), findsOneWidget);
+    expect(settings.mode, PlayMode.normal);
+    await tester.pumpWidget(const SizedBox());
+    settings.dispose();
+  });
+
+  testWidgets(
+    'Turning on reduced motion during a shuffle reveals a fair preview',
+    (tester) async {
+      final (settings, _) = await mount(
+        tester,
+        level: 10,
+        mode: PlayMode.normal,
+        reducedMotion: false,
+      );
+      await begin(tester);
+      await tester.pump(const Duration(milliseconds: 2400));
+      await tester.pump(const Duration(milliseconds: 280));
+      expect(find.text('Follow the boxes'), findsOneWidget);
+      settings.update(reducedMotion: true);
+      await tester.pump();
+      expect(find.text('Watch the red boxes'), findsOneWidget);
+      expect(
+        tester
+            .widgetList<PocketTile>(find.byType(PocketTile))
+            .where((tile) => tile.red)
+            .length,
+        4,
+      );
+      await tester.pump(const Duration(milliseconds: 2400));
+      expect(find.text('Tap the others'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+      settings.dispose();
+    },
+  );
+
+  for (final textScale in [1.2, 1.4, 1.8, 2.0]) {
+    testWidgets(
+      'Normal board remains reachable at system text scale $textScale',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 568);
+        tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.textScaleFactorTestValue = textScale;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        final (settings, _) = await mount(
+          tester,
+          level: 151,
+          mode: PlayMode.normal,
+        );
+        final homeError = tester.takeException();
+        expect(homeError, isNull, reason: 'Home with large text');
+        await begin(tester);
+        final gameError = tester.takeException();
+        expect(gameError, isNull, reason: 'Game with large text');
+        await tester.pump();
+        final board = tester.getRect(find.byKey(const ValueKey('game-board')));
+        expect(board.top, greaterThanOrEqualTo(0));
+        expect(board.bottom, lessThanOrEqualTo(568));
+        await tester.ensureVisible(
+          find.byKey(ValueKey('box-${tileIds(tester).last}')),
+        );
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+        settings.dispose();
+      },
+    );
+  }
+
+  for (final level in [10, 40, 100, 151, 1000]) {
+    testWidgets(
+      'Normal level $level keeps 48px square targets on a small phone',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 568);
+        tester.view.devicePixelRatio = 1;
+        tester.view.padding = const FakeViewPadding(top: 20);
+        addTearDown(tester.view.resetPadding);
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final (settings, _) = await mount(
+          tester,
+          level: level,
+          mode: PlayMode.normal,
+        );
+        await begin(tester);
+        for (final tile in find.byType(PocketTile).evaluate()) {
+          final rect = tester.getRect(find.byWidget(tile.widget));
+          expect(rect.width, greaterThanOrEqualTo(48));
+          expect(rect.height, closeTo(rect.width, .01));
+          expect(rect.top, greaterThanOrEqualTo(20));
+          expect(rect.bottom, lessThanOrEqualTo(568));
+          expect(rect.left, greaterThanOrEqualTo(0));
+          expect(rect.right, lessThanOrEqualTo(320));
+        }
+        final last = find.byKey(ValueKey('box-${tileIds(tester).last}'));
+        await tester.ensureVisible(last);
+        await tester.pump();
+        expect(tester.getRect(last).bottom, lessThanOrEqualTo(568));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+        settings.dispose();
+      },
+    );
+  }
+
+  testWidgets(
+    'Landscape previews show a whole large board and rotation replays it',
+    (tester) async {
+      tester.view.physicalSize = const Size(568, 320);
+      tester.view.devicePixelRatio = 1;
+      tester.view.padding = const FakeViewPadding(top: 20);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPadding);
+      final (settings, _) = await mount(
+        tester,
+        level: 150,
+        mode: PlayMode.normal,
+      );
+      await begin(tester);
+      await tester.pump();
+      final previewReds = tester
+          .widgetList<PocketTile>(find.byType(PocketTile))
+          .where((tile) => tile.red)
+          .map((tile) => tile.id)
+          .toSet();
+      expect(previewReds.length, 10);
+      for (final tile in find.byType(PocketTile).evaluate()) {
+        final rect = tester.getRect(find.byWidget(tile.widget));
+        expect(rect.width, greaterThanOrEqualTo(48));
+        expect(rect.height, closeTo(rect.width, .01));
+        expect(rect.top, greaterThanOrEqualTo(20));
+        expect(rect.bottom, lessThanOrEqualTo(320));
+      }
+      await tester.pump(const Duration(milliseconds: 1400));
+      expect(find.text('Tap the others'), findsOneWidget);
+      tester.view.physicalSize = const Size(320, 568);
+      await tester.pump();
+      expect(find.text('Watch the red boxes'), findsOneWidget);
+      expect(
+        tester
+            .widgetList<PocketTile>(find.byType(PocketTile))
+            .where((tile) => tile.red)
+            .map((tile) => tile.id)
+            .toSet(),
+        previewReds,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      settings.dispose();
+    },
+  );
+
   testWidgets('Privacy policy and support are available inside settings', (
     tester,
   ) async {
@@ -307,7 +575,7 @@ void main() {
         .map((tile) => tile.id)
         .toSet();
     expect(find.text('LEVEL 02'), findsOneWidget);
-    expect(find.text('Easy · At your pace'), findsOneWidget);
+    expect(find.text('Zen · Easy'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     for (final id in tileIds(tester).where((id) => !originalRed.contains(id))) {
       await tapVisible(tester, find.byKey(ValueKey('box-$id')));
@@ -363,7 +631,7 @@ void main() {
         isNotNull,
       );
       await tapVisible(tester, find.byKey(const ValueKey('level-51')));
-      expect(find.text('Gentle · At your pace'), findsOneWidget);
+      expect(find.text('Zen · Gentle'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
       settings.dispose();
     },
@@ -438,7 +706,7 @@ void main() {
         final (settings, _) = await mount(tester, level: level);
         await begin(tester);
         await tester.pump(const Duration(seconds: 3));
-        final grid = tester.getRect(find.byType(GridView));
+        final grid = tester.getRect(find.byKey(const ValueKey('game-board')));
         expect(grid.top, greaterThanOrEqualTo(0));
         expect(grid.bottom, lessThanOrEqualTo(568));
         final tiles = find.byType(PocketTile);

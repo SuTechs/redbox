@@ -32,6 +32,23 @@ class _LevelsPageState extends State<LevelsPage> {
   static const _chapterSize = 50;
   late int _chapter = (widget.settings.level - 1) ~/ _chapterSize;
   final _scroll = ScrollController();
+  late PlayMode _mode;
+
+  @override
+  void initState() {
+    super.initState();
+    _mode = widget.settings.mode;
+    widget.settings.addListener(_modeChanged);
+  }
+
+  void _modeChanged() {
+    if (_mode == widget.settings.mode) return;
+    setState(() {
+      _mode = widget.settings.mode;
+      _chapter = (widget.settings.level - 1) ~/ _chapterSize;
+    });
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+  }
 
   int get _firstLevel => _chapter * _chapterSize + 1;
   int get _lastLevel => _firstLevel + _chapterSize - 1;
@@ -147,9 +164,9 @@ class _LevelsPageState extends State<LevelsPage> {
                           onPressed: () => Navigator.pop(context),
                           icon: const Icon(Icons.arrow_back_rounded),
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'LEVELS',
+                            '${widget.settings.mode.label.toUpperCase()} LEVELS',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 13,
@@ -190,14 +207,20 @@ class _LevelsPageState extends State<LevelsPage> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Little steps',
+                                              widget.settings.mode ==
+                                                      PlayMode.zen
+                                                  ? 'Little steps'
+                                                  : 'One more challenge',
                                               style: PocketType.title.copyWith(
                                                 fontSize: 36,
                                               ),
                                             ),
                                             const SizedBox(height: 8),
-                                            const Text(
-                                              'Revisit a favorite.\nTake your time.',
+                                            Text(
+                                              widget.settings.mode ==
+                                                      PlayMode.zen
+                                                  ? 'Revisit a favorite.\nTake your time.'
+                                                  : 'Build your memory.\nBeat your next level.',
                                               style: PocketType.body,
                                             ),
                                           ],
@@ -243,24 +266,35 @@ class _LevelsPageState extends State<LevelsPage> {
                                                 ),
                                               ),
                                             ),
-                                            _PaceBadge(pace: pace),
+                                            widget.settings.mode == PlayMode.zen
+                                                ? _PaceBadge(pace: pace)
+                                                : const Text(
+                                                    'Normal',
+                                                    style: PocketType.body,
+                                                  ),
                                           ],
                                         ),
                                         const SizedBox(height: 12),
                                         Text(
-                                          pace.title,
+                                          widget.settings.mode == PlayMode.zen
+                                              ? pace.title
+                                              : 'A growing challenge',
                                           style: PocketType.title.copyWith(
                                             fontSize: 25,
                                           ),
                                         ),
                                         const SizedBox(height: 5),
                                         Text(
-                                          pace.description,
+                                          widget.settings.mode == PlayMode.zen
+                                              ? pace.description
+                                              : 'More reds, larger boards, shorter previews. Shuffles begin at level 10.',
                                           style: PocketType.body.copyWith(
                                             fontSize: 13,
                                           ),
                                         ),
-                                        if (_firstLevel > 50) ...[
+                                        if (widget.settings.mode ==
+                                                PlayMode.zen &&
+                                            _firstLevel > 50) ...[
                                           const SizedBox(height: 12),
                                           Row(
                                             children: [
@@ -370,6 +404,7 @@ class _LevelsPageState extends State<LevelsPage> {
                                 final level = _firstLevel + index;
                                 return _LevelTile(
                                   level: level,
+                                  mode: widget.settings.mode,
                                   current: level == widget.settings.level,
                                   completed: level < widget.settings.level,
                                   onTap: level <= widget.settings.level
@@ -417,7 +452,9 @@ class _LevelsPageState extends State<LevelsPage> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'No finish line. No hurry.',
+                          widget.settings.mode == PlayMode.zen
+                              ? 'No finish line. No hurry.'
+                              : 'Your Normal progress · Zen is saved separately',
                           style: PocketType.body.copyWith(fontSize: 12),
                         ),
                       ],
@@ -434,6 +471,7 @@ class _LevelsPageState extends State<LevelsPage> {
 
   @override
   void dispose() {
+    widget.settings.removeListener(_modeChanged);
     _scroll.dispose();
     super.dispose();
   }
@@ -464,12 +502,14 @@ class _PaceBadge extends StatelessWidget {
 class _LevelTile extends StatelessWidget {
   const _LevelTile({
     required this.level,
+    required this.mode,
     required this.current,
     required this.completed,
     required this.onTap,
   });
 
   final int level;
+  final PlayMode mode;
   final bool current;
   final bool completed;
   final VoidCallback? onTap;
@@ -477,7 +517,7 @@ class _LevelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locked = onTap == null;
-    final breather = isBreatherLevel(level);
+    final breather = mode == PlayMode.zen && isBreatherLevel(level);
     return Semantics(
       label:
           'Level $level, ${current

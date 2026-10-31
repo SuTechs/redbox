@@ -82,6 +82,104 @@ class _PatternTemplate {
   int get boxCount => mask.join().split('').where((cell) => cell == '#').length;
 }
 
+/// Larger, reproducible Normal boards. Zen's [patternForLevel] stays unchanged.
+BoardLayout normalPatternForLevel(
+  int level, {
+  required int boxCount,
+  int seed = defaultPatternSeed,
+}) {
+  if (level < 1) throw ArgumentError.value(level, 'level', 'Must be positive');
+  final candidates = [
+    ..._patterns,
+    ..._normalPatterns,
+  ].where((pattern) => pattern.boxCount == boxCount).toList();
+  if (candidates.isEmpty) {
+    throw ArgumentError.value(boxCount, 'boxCount', 'Unsupported board size');
+  }
+  final random = _PatternRandom(seed + level * 97);
+  final template = candidates[random.nextInt(candidates.length)];
+  var mask = template.mask.toList();
+  if (random.nextInt(2) == 1) mask = mask.reversed.toList();
+  if (random.nextInt(2) == 1) {
+    mask = mask.map((row) => row.split('').reversed.join()).toList();
+  }
+  // Never rotate a tall board into six or seven columns on a small phone.
+  if (mask.length <= 5 && random.nextInt(2) == 1) {
+    mask = List.generate(
+      mask.first.length,
+      (column) => List.generate(mask.length, (row) => mask[row][column]).join(),
+    );
+  }
+  var id = 0;
+  return BoardLayout(
+    template.name,
+    mask.first.length,
+    List.unmodifiable([
+      for (final row in mask)
+        for (final cell in row.split('')) cell == '#' ? id++ : null,
+    ]),
+  );
+}
+
+const _normalPatterns = [
+  _PatternTemplate('Tall diamond', [
+    '..#..',
+    '.###.',
+    '#####',
+    '#####',
+    '.###.',
+    '..#..',
+  ]),
+  _PatternTemplate('Long leaf', [
+    '.###.',
+    '#####',
+    '#####',
+    '#####',
+    '..#..',
+    '..#..',
+  ]),
+  _PatternTemplate('Garden lantern', [
+    '.###.',
+    '#####',
+    '#####',
+    '#####',
+    '.###.',
+    '..#..',
+  ]),
+  _PatternTemplate('Window', [
+    '.###.',
+    '#####',
+    '##.##',
+    '##.##',
+    '#####',
+    '.###.',
+  ]),
+  _PatternTemplate('Cloud', [
+    '.###.',
+    '#####',
+    '#####',
+    '#####',
+    '#####',
+    '.###.',
+  ]),
+  _PatternTemplate('Wide ribbon', [
+    '.###.',
+    '#####',
+    '#####',
+    '#####',
+    '#####',
+    '#####',
+  ]),
+  _PatternTemplate('Mosaic', [
+    '#####',
+    '#####',
+    '#####',
+    '#####',
+    '#####',
+    '#####',
+  ]),
+];
+
 // Composed silhouettes keep random results balanced and connected. Reflection,
 // rotation and shuffled ordering vary rows, columns and satisfying tapping paths.
 const _patterns = [

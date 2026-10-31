@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'music_track.dart';
+import '../game/play_mode.dart';
+export '../game/play_mode.dart';
 
 abstract interface class SettingsStore {
   Future<Map<String, Object?>> read();
@@ -42,7 +44,20 @@ class AppSettings extends ChangeNotifier {
   AppSettings({required this.store});
 
   final SettingsStore store;
-  int level = 1;
+  PlayMode mode = PlayMode.normal;
+  int normalLevel = 1;
+  int zenLevel = 1;
+  int levelForMode(PlayMode mode) =>
+      mode == PlayMode.zen ? zenLevel : normalLevel;
+  int get level => levelForMode(mode);
+  set level(int value) {
+    if (mode == PlayMode.zen) {
+      zenLevel = value;
+    } else {
+      normalLevel = value;
+    }
+  }
+
   bool sound = true;
   bool musicEnabled = true;
   MusicTrack musicTrack = MusicTrack.cloudDrift;
@@ -58,8 +73,13 @@ class AppSettings extends ChangeNotifier {
   Future<void> load() async {
     try {
       final values = await store.read();
-      final savedLevel = values['level'];
-      if (savedLevel is int && savedLevel > 0) level = savedLevel;
+      int validLevel(Object? value) => value is int && value > 0 ? value : 1;
+      // v1 progress belongs to the unchanged Zen game, never to Normal.
+      zenLevel = validLevel(values['zenLevel'] ?? values['level']);
+      normalLevel = validLevel(values['normalLevel']);
+      mode = values['mode'] == PlayMode.zen.name
+          ? PlayMode.zen
+          : PlayMode.normal;
       sound = values['sound'] is bool ? values['sound'] as bool : true;
       musicEnabled = values['musicEnabled'] is bool
           ? values['musicEnabled'] as bool
@@ -79,6 +99,7 @@ class AppSettings extends ChangeNotifier {
   }
 
   void update({
+    PlayMode? mode,
     bool? sound,
     bool? musicEnabled,
     MusicTrack? musicTrack,
@@ -87,6 +108,7 @@ class AppSettings extends ChangeNotifier {
     bool? symbolCue,
     int? previewSeconds,
   }) {
+    if (mode != null) this.mode = mode;
     if (sound != null) this.sound = sound;
     if (musicEnabled != null) this.musicEnabled = musicEnabled;
     if (musicTrack != null) this.musicTrack = musicTrack;
@@ -100,16 +122,24 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
-  void unlock(int nextLevel) {
-    if (nextLevel <= level) return;
-    level = nextLevel;
+  void unlock(int nextLevel, {PlayMode? mode}) {
+    final target = mode ?? this.mode;
+    if (nextLevel <= levelForMode(target)) return;
+    if (target == PlayMode.zen) {
+      zenLevel = nextLevel;
+    } else {
+      normalLevel = nextLevel;
+    }
     _persist();
     notifyListeners();
   }
 
   void _persist() {
     final snapshot = <String, Object?>{
-      'level': level,
+      'level': zenLevel, // Keep legacy readers on their original Zen progress.
+      'zenLevel': zenLevel,
+      'normalLevel': normalLevel,
+      'mode': mode.name,
       'sound': sound,
       'musicEnabled': musicEnabled,
       'musicTrack': musicTrack.name,

@@ -8,6 +8,7 @@ import '../core/music.dart';
 import '../core/sound.dart';
 import '../game/round.dart';
 import 'game_page.dart';
+import 'mode_selector.dart';
 import 'help_and_settings.dart';
 import 'levels_page.dart';
 import 'pocket_theme.dart';
@@ -27,13 +28,14 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: settings,
     builder: (context, _) => PocketPage(
-      minimumHeight: 626,
+      minimumHeight: 770,
+      fillHeight: MediaQuery.textScalerOf(context).scale(16) <= 16,
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const PocketWordmark(),
+              const Flexible(child: PocketWordmark()),
               IconButton(
                 tooltip: 'Settings',
                 onPressed: () => showPocketSettings(context, settings, sounds),
@@ -41,7 +43,10 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
+          if (MediaQuery.textScalerOf(context).scale(16) <= 16)
+            const Spacer()
+          else
+            const SizedBox(height: 24),
           const HomeIllustration(),
           const SizedBox(height: 20),
           const Text(
@@ -64,7 +69,17 @@ class HomePage extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const Spacer(flex: 2),
+          if (MediaQuery.textScalerOf(context).scale(16) <= 16)
+            const Spacer(flex: 2)
+          else
+            const SizedBox(height: 32),
+          ModeSelector(settings: settings),
+          const SizedBox(height: 6),
+          Text(
+            settings.mode.description,
+            style: PocketType.body.copyWith(fontSize: 12),
+          ),
+          const SizedBox(height: 18),
           if (settings.level > 1) ...[
             Text(
               'Your next little win · Level ${settings.level}',
@@ -96,7 +111,9 @@ class HomePage extends StatelessWidget {
           const SizedBox(height: 14),
           PocketButton(
             key: const ValueKey('browse-levels'),
-            label: 'Little steps · Levels',
+            label: settings.mode == PlayMode.zen
+                ? 'Little steps · Levels'
+                : 'Challenges · Levels',
             icon: Icons.grid_view_rounded,
             secondary: true,
             onPressed: () {

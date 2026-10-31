@@ -4,6 +4,62 @@ import 'package:redbox/core/music_track.dart';
 
 void main() {
   test(
+    'Legacy progress migrates to Zen and retains comfort preferences',
+    () async {
+      final store = MemorySettingsStore()
+        ..values = {
+          'level': 174,
+          'sound': false,
+          'previewSeconds': 5,
+          'reducedMotion': true,
+          'symbolCue': true,
+        };
+      final settings = AppSettings(store: store);
+      await settings.load();
+      expect(settings.mode, PlayMode.normal);
+      expect(settings.normalLevel, 1);
+      expect(settings.zenLevel, 174);
+      expect(settings.sound, isFalse);
+      expect(settings.previewSeconds, 5);
+      expect(settings.reducedMotion, isTrue);
+      expect(settings.symbolCue, isTrue);
+      settings.update(mode: PlayMode.zen);
+      expect(settings.level, 174);
+      await settings.saved;
+      final restored = AppSettings(store: store);
+      await restored.load();
+      expect(restored.mode, PlayMode.zen);
+      expect(restored.level, 174);
+      expect(restored.normalLevel, 1);
+      settings.dispose();
+      restored.dispose();
+    },
+  );
+
+  test(
+    'Mode progress never leaks and rapid switches persist in order',
+    () async {
+      final store = MemorySettingsStore();
+      final settings = AppSettings(store: store);
+      settings.unlock(21);
+      settings.update(mode: PlayMode.zen);
+      settings.unlock(70);
+      settings.unlock(22, mode: PlayMode.normal);
+      settings.unlock(2);
+      settings.update(mode: PlayMode.normal);
+      expect(settings.level, 22);
+      expect(settings.zenLevel, 70);
+      await settings.saved;
+      final restored = AppSettings(store: store);
+      await restored.load();
+      expect(restored.mode, PlayMode.normal);
+      expect(restored.normalLevel, 22);
+      expect(restored.zenLevel, 70);
+      settings.dispose();
+      restored.dispose();
+    },
+  );
+  test(
     'Progress and preferences persist and never roll back an unlocked level',
     () async {
       final store = MemorySettingsStore();

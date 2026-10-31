@@ -22,9 +22,11 @@ class PocketPage extends StatelessWidget {
     super.key,
     required this.child,
     required this.minimumHeight,
+    this.fillHeight = true,
   });
   final Widget child;
   final double minimumHeight;
+  final bool fillHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -34,19 +36,29 @@ class PocketPage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: math.max(constraints.maxHeight, minimumHeight),
-                  ),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 25),
-                      child: child,
+              builder: (context, constraints) => !fillHeight
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 25),
+                        child: child,
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: math.max(
+                            constraints.maxHeight,
+                            minimumHeight,
+                          ),
+                        ),
+                        child: IntrinsicHeight(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 16, 24, 25),
+                            child: child,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
         ),
@@ -165,13 +177,15 @@ class PocketWordmark extends StatelessWidget {
         ),
       ),
       const SizedBox(width: 8),
-      const Text(
-        'Red Box',
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w800,
-          color: PocketColors.ink,
-          letterSpacing: -.4,
+      const Flexible(
+        child: Text(
+          'Red Box',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: PocketColors.ink,
+            letterSpacing: -.4,
+          ),
         ),
       ),
     ],
