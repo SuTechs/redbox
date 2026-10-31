@@ -4,19 +4,14 @@
 
 ### Added
 
-- Play Normal mode with progressively larger boards, more red boxes to remember, shorter previews, and visible shuffles from level 20.
-- Choose Zen mode for the original relaxed game. Enter Zen through the lotus icon beside Settings; the main Play action opens Normal. Each mode has separate saved progress.
-- Use Extra time or reduced motion for a more comfortable challenge; reduced motion disables shuffles.
+- Normal memory progression from four boxes and one red to forty boxes and twenty reds. Level 500 remembers twelve reds; level 1,300 remembers eighteen.
+- Memory-sized previews with gradual practice speed changes, plus visible pair shuffles starting at 50 and growing to four pairs.
+- Level-free Zen: a shuffled deck of beautiful connected silhouettes, no solid rectangles or squares, one or two reds, no speed ramp or shuffle.
+- Another board, Another look and a New board pause action in Zen.
 
 ### Changed
 
-- Preserve existing v1 level progress in Zen while starting the new Normal track at level 1.
-- Show mode and difficulty information on Levels and Game, and keep larger boards tappable on small screens and with larger text.
-
-- Start Normal with four boxes and grow gradually; cap safe taps at 14 so memory carries the challenge.
-- Give level cards their actual seeded silhouette and red count, with chapter-specific guidance.
-- Restore Zen’s warm cream background and retain sage lotus accents.
-
-### Fixed
-
-- Keep both moving tiles visible when a shuffle happens at a board edge.
+- Place Play Zen beneath Continue and Levels beneath Settings. Remove mode switches and pattern previews in the Normal-only level browser.
+- Use fitted dense-board layouts and landscape side controls while retaining visible 48px square targets, large-text support and replay after rotation.
+- Preserve Normal unlocks and preferences; archive old Zen counters without using them as Normal progression.
+- Keep both moving tiles visible at board edges. Reduced motion disables swaps; Extra time extends the memory preview.

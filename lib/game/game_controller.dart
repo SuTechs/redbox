@@ -22,7 +22,7 @@ class GameController extends ChangeNotifier {
   int shuffleStep = 0;
   Map<int, int> _positions = {};
   Map<int, int> _previousPositions = {};
-  static const swapDuration = Duration(milliseconds: 650);
+  Duration get swapDuration => round.swapDuration;
   static const swapSettle = Duration(milliseconds: 180);
   Map<int, int> get positions => Map.unmodifiable(_positions);
   Map<int, int> get previousPositions => Map.unmodifiable(_previousPositions);
@@ -35,10 +35,11 @@ class GameController extends ChangeNotifier {
     int level, {
     Duration? preview,
     int previewSeconds = 3,
-    PlayMode mode = PlayMode.zen,
+    PlayMode mode = PlayMode.normal,
+    LayoutProfile profile = LayoutProfile.portrait,
     bool reducedMotion = false,
   }) {
-    round = generator.generate(level, mode: mode);
+    round = generator.generate(level, mode: mode, profile: profile);
     replay(
       preview: preview ?? round.previewDuration(seconds: previewSeconds),
       reducedMotion: reducedMotion,
@@ -73,12 +74,40 @@ class GameController extends ChangeNotifier {
   }
 
   void retry({required Duration preview, bool reducedMotion = false}) {
+    if (round.mode == PlayMode.zen) {
+      replay(preview: preview, reducedMotion: reducedMotion);
+      return;
+    }
     start(
       round.level,
       mode: round.mode,
       preview: preview,
+      profile: round.profile,
       reducedMotion: reducedMotion,
     );
+  }
+
+  void fit(
+    LayoutProfile profile, {
+    required Duration preview,
+    bool reducedMotion = false,
+  }) {
+    if (round.profile == profile) return;
+    round = generator.fit(round, profile);
+    if ([
+      RoundPhase.complete,
+      RoundPhase.retry,
+      RoundPhase.paused,
+    ].contains(phase)) {
+      _positions = {
+        for (var i = 0; i < round.layout.slots.length; i++)
+          if (round.layout.slots[i] case final int id) id: i,
+      };
+      _previousPositions = Map.of(_positions);
+      notifyListeners();
+    } else {
+      replay(preview: preview, reducedMotion: reducedMotion);
+    }
   }
 
   void _advanceShuffle() {

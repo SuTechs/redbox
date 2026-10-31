@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+
+enum LayoutProfile { portrait, landscape }
+
 const defaultPatternSeed = 20261002;
 
 class BoardLayout {
@@ -87,8 +91,10 @@ BoardLayout normalPatternForLevel(
   int level, {
   required int boxCount,
   int seed = defaultPatternSeed,
+  LayoutProfile profile = LayoutProfile.portrait,
 }) {
   if (level < 1) throw ArgumentError.value(level, 'level', 'Must be positive');
+  if (boxCount > 24) return _largePattern(level, boxCount, seed, profile);
   final candidates = [
     ..._patterns,
     ..._normalPatterns,
@@ -119,6 +125,9 @@ BoardLayout normalPatternForLevel(
       mask.first.length,
       (column) => List.generate(mask.length, (row) => mask[row][column]).join(),
     );
+  }
+  if (profile == LayoutProfile.landscape && mask.length > mask.first.length) {
+    mask = _transpose(mask);
   }
   var id = 0;
   return BoardLayout(
@@ -277,4 +286,168 @@ class _PatternRandom {
     _state = (_state * 48271) % 2147483647;
     return _state % maximum;
   }
+}
+
+List<String> _transpose(List<String> mask) => List.generate(
+  mask.first.length,
+  (c) => List.generate(mask.length, (r) => mask[r][c]).join(),
+);
+
+BoardLayout _fromMask(String name, List<String> mask) {
+  var id = 0;
+  return BoardLayout(
+    name,
+    mask.first.length,
+    List.unmodifiable([
+      for (final row in mask)
+        for (final c in row.split('')) c == '#' ? id++ : null,
+    ]),
+  );
+}
+
+/// Dense boards use connected row spans with a shared center. Alternating the
+/// opening span prevents adjacent identical silhouettes, even in endless play.
+BoardLayout _largePattern(
+  int level,
+  int count,
+  int seed,
+  LayoutProfile profile,
+) {
+  final wide = profile == LayoutProfile.landscape;
+  final columns = wide ? 9 : 6;
+  final rows = math.min(wide ? 5 : 8, (count / columns).ceil() + 1);
+  final widths = List.filled(rows, 1);
+  widths[0] = wide ? (level.isEven ? 6 : 8) : (level.isEven ? 2 : 4);
+  var remaining = count - widths.fold(0, (a, b) => a + b);
+  final family = (level + seed) % 5;
+  // Integer weights and cross multiplication keep tie-breaking identical in
+  // Dart VM and JavaScript; transcendental rounding must not change a seed.
+  int baseWeight(int r) => switch (family) {
+    0 => 2 + 2 * math.min(r, rows - 1 - r),
+    1 => 2 + (2 * r - (rows - 1)).abs(),
+    2 => 2 + r,
+    3 => 2 + rows - 1 - r,
+    _ => 2 + ((2 * r - (rows - 1)).abs() - (rows - 1) ~/ 2).abs(),
+  };
+  final variation = _PatternRandom(seed + level * 97);
+  final weights = List.generate(
+    rows,
+    (r) => baseWeight(r) * 4 + variation.nextInt(16),
+  );
+  int weight(int r) => weights[r];
+  while (remaining > 0) {
+    int? best;
+    for (var r = 1; r < rows; r++) {
+      if (widths[r] >= columns) continue;
+      if (best == null ||
+          weight(r) * (2 * widths[best] + 1) >
+              weight(best) * (2 * widths[r] + 1)) {
+        best = r;
+      }
+    }
+    widths[best!]++;
+    remaining--;
+  }
+  final mask = List.generate(rows, (r) {
+    final width = widths[r];
+    final drift = width >= 3 && width < columns && variation.nextInt(2) == 1
+        ? 1
+        : 0;
+    final left = ((columns - width) ~/ 2 + drift).clamp(0, columns - width);
+    return '.' * left + '#' * width + '.' * (columns - width - left);
+  });
+  return _fromMask(
+    [
+      'Lantern path',
+      'Hourglass garden',
+      'Unfurling leaf',
+      'Soft canopy',
+      'Ribbon garden',
+    ][family],
+    mask,
+  );
+}
+
+/// Zen excludes every solid square/rectangle. Named silhouettes form a shuffled
+/// deck; rounds are independent of campaign progress.
+final zenPatternNames = List<String>.unmodifiable(
+  _zenPatterns.map((p) => p.name),
+);
+final _zenPatterns =
+    [
+          // Curate for recognizable silhouettes, not merely a rectangle with
+          // a missing corner. These heavier grid-like families remain Normal-only.
+          ..._patterns.where(
+            (p) => !const {
+              'Dome',
+              'Picture frame',
+              'Cup',
+              'Bridge',
+            }.contains(p.name),
+          ),
+          const _PatternTemplate('Little heart', [
+            '.#.#.',
+            '#####',
+            '#####',
+            '.###.',
+            '..#..',
+          ]),
+          const _PatternTemplate('Lotus', [
+            '..#..',
+            '.###.',
+            '#.#.#',
+            '#####',
+            '.###.',
+          ]),
+          const _PatternTemplate('Soft bow', [
+            '##.##',
+            '.###.',
+            '.###.',
+            '##.##',
+          ]),
+          const _PatternTemplate('Sun fan', [
+            '..#..',
+            '.###.',
+            '#####',
+            '..#..',
+            '..#..',
+          ]),
+          const _PatternTemplate('Cloud puff', [
+            '.##..',
+            '#####',
+            '#####',
+            '..#..',
+          ]),
+          const _PatternTemplate('Garden arch', [
+            '.###.',
+            '##.##',
+            '#...#',
+            '#...#',
+          ]),
+          const _PatternTemplate('Tulip garden', [
+            '.#.#.',
+            '.###.',
+            '#####',
+            '..#..',
+            '..#..',
+          ]),
+        ]
+        .where(
+          (p) =>
+              p.boxCount >= 6 &&
+              p.mask.join().contains('.') &&
+              p.boxCount <= 16,
+        )
+        .toList();
+
+BoardLayout zenPattern(int family, int variation) {
+  final p = _zenPatterns[family % _zenPatterns.length];
+  var mask = p.mask.toList();
+  if (variation.isOdd) {
+    mask = mask.map((row) => row.split('').reversed.join()).toList();
+  }
+  for (var i = 0; i < (variation ~/ 2) % 4; i++) {
+    mask = _transpose(mask.reversed.toList());
+  }
+  return _fromMask(p.name, mask);
 }

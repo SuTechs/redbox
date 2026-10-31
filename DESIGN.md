@@ -59,12 +59,32 @@ Bundle original, quiet WAV cues for taps, continuing, completion, and mistakes. 
 
 ## Normal and Zen
 
-Preserve the Pocket toy typography, coral red boxes, and tactile controls in both modes. Normal uses the original warm cream; Zen shares the warm cream background (`#FFF8ED`), with a sage accent surface (`#E8EBDD`), and dark sage ink (`#506950`), with a lotus beside its mode badge. Home keeps a single primary Play action for Normal and a sage lotus icon immediately beside Settings to launch Zen. Do not show a Normal / Zen text selector on Home. The level browser follows the last-played track and offers a Zen switch in its Settings. Show the active mode on Levels and Game. Zen keeps the original gameplay below. Normal adds larger silhouettes (at most five columns in portrait), more remembered boxes, shorter previews, and visible pair swaps from level 20. See [the difficulty plan](docs/plans/normal-and-zen.md).
+Home keeps Normal's primary Continue action, then a secondary **Play Zen** action
+with a sage lotus. Settings stays at the upper right; a Levels icon sits directly
+below it. There is no header Zen shortcut, mode selector or Zen Settings toggle.
+Levels is a Normal-only numbered browser without shape previews or per-cell
+red counts. Use useful chapter skill summaries and clear completed/current/locked
+states. Both Home play actions stay visible on a 320×568 phone at default text.
 
-For shuffles, fade all red cues first, lock taps, then move one remembered/safe pair at a time along opposite arcs. Each swap moves for 650ms with a 180ms settling gap. Draw moving boxes above stationary boxes. Keep 48px square targets; allow vertical scrolling for larger boards on short phones and wrap progress dots. Tall boards transpose in landscape, and rotating during an active round replays the same preview. Reduced motion disables shuffling rather than concealing an instantaneous rearrangement.
+Zen has no level counter. It uses the warm cream background, sage accents
+(`#E8EBDD`) and dark sage ink (`#506950`), with a visible Zen/lotus identity. Its
+shuffled deck excludes all solid rectangles and squares: choose shaped petals,
+leaves, rings, ribbons, arches and wings. Avoid consecutive family repeats.
+Completion says Another board; mistakes offer Another look, replaying that board.
 
-Progress and current level are separate per mode. Old progress belongs to Zen. Mode changes happen from Home or Levels; the pause sheet keeps the current round's mode fixed. Extra time works in Normal too.
+Normal uses the [approved curve](docs/plans/progression-redesign.md). The red
+count rises to eighteen on forty-box boards at 1,300. The shape and timing are
+stable per level; retry changes reds and movement plans. Small, spaced movement
+milestones follow memory growth. Opposite arcs and shared edge corrections keep
+both moving tiles visible. Draw moving boxes above stationary tiles; lock input
+until their movement and settling gap end.
 
-## Zen gameplay commitments
+Regular phones retain the spacious layout. Dense, short, landscape and large-text
+screens use board-first controls, with a side rail in landscape. Fit variants
+within six columns/eight rows in portrait or nine columns/five rows in landscape.
+All active tiles are square, at least 48px, and fully visible; never put part of a
+timed board out of view. Reserve tile-depth space. Rotation replays remembered
+identities in the new fitted variant. Reduced motion disables shuffles.
 
-Fresh rounds randomize red positions, including level 1. Retry regenerates the red set; recent same-level repetitions are avoided. Pause/resume keeps the current pattern. Levels never wrap back to 1. Shapes with 6–16 boxes vary from the beginning; the first 50 levels stay easy by previewing just one red box. Later levels mix one, two, and three red boxes. Easy moments keep the varied silhouette and reduce memory load. Tapping remains the main pleasure. Pattern families are connected, with seeded rotations/reflections, alternating sizes, and no consecutive family repeats. Fit both tall and wide patterns to the screen while retaining 48-pixel touch targets. Pace labels stay friendly: Easy, Gentle, Steady, Playful, Curious, Endless. Do not determine correctness from the current tile color.
+Maintain separate Normal progression and temporary Zen sessions. Keep saved
+Normal unlocks and comfort preferences; old Zen counters are inert migration data.

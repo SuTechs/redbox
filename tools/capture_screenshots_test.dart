@@ -73,7 +73,6 @@ void main() {
       ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
     await icons.load();
     final settings = AppSettings(store: MemorySettingsStore())
-      ..mode = PlayMode.zen
       ..level = 14
       ..reducedMotion = true
       ..haptics = false;

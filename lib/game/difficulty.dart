@@ -1,108 +1,101 @@
+/// The approved Normal curve. Memory grows; speed is practiced within a band.
 class NormalDifficulty {
   const NormalDifficulty._(
+    this.level,
+    this.firstLevel,
     this.boxCounts,
     this.redCount,
-    this.previewMilliseconds,
-    this.swapCount,
-    this.label,
   );
-
+  final int level;
+  final int firstLevel;
   final List<int> boxCounts;
   final int redCount;
-  final int previewMilliseconds;
-  final int swapCount;
-  final String label;
 
   static NormalDifficulty forLevel(int level) {
     if (level < 1) {
       throw ArgumentError.value(level, 'level', 'Must be positive');
     }
-    if (level <= 1) {
-      return const NormalDifficulty._([4], 1, 3000, 0, 'First steps');
-    }
-    if (level <= 2) {
-      return const NormalDifficulty._([5], 1, 3000, 0, 'First steps');
-    }
-    if (level <= 4) {
-      return const NormalDifficulty._([6], 2, 3000, 0, 'First steps');
-    }
-    if (level <= 5) {
-      return const NormalDifficulty._([7], 2, 3000, 0, 'First steps');
-    }
-    if (level <= 7) {
-      return const NormalDifficulty._([8], 3, 3000, 0, 'Finding focus');
-    }
-    if (level <= 9) {
-      return const NormalDifficulty._([9], 3, 3000, 0, 'Finding focus');
-    }
-    if (level <= 10) {
-      return const NormalDifficulty._([10], 4, 3000, 0, 'Finding focus');
-    }
-    if (level <= 19) {
-      return const NormalDifficulty._(
-        [10, 11, 12],
-        4,
-        3000,
-        0,
-        'Finding focus',
-      );
-    }
-    if (level <= 29) {
-      return const NormalDifficulty._([12], 4, 3000, 1, 'First moves');
-    }
-    if (level <= 39) {
-      return const NormalDifficulty._([12, 13, 14], 5, 2800, 1, 'Memory paths');
-    }
-    if (level <= 49) {
-      return const NormalDifficulty._([14], 5, 2800, 2, 'Memory paths');
-    }
-    if (level <= 69) {
-      return const NormalDifficulty._(
-        [14, 15, 16],
-        6,
-        2600,
-        2,
-        'Building rhythm',
-      );
-    }
-    if (level <= 89) {
-      return const NormalDifficulty._(
-        [16, 17, 18],
-        7,
-        2600,
-        2,
-        'Building rhythm',
-      );
-    }
-    if (level <= 119) {
-      return const NormalDifficulty._([18], 7, 2400, 3, 'Moving patterns');
-    }
-    if (level <= 159) {
-      return const NormalDifficulty._(
-        [18, 19, 20],
-        8,
-        2400,
-        3,
-        'Moving patterns',
-      );
-    }
-    if (level <= 219) {
-      return const NormalDifficulty._([20], 8, 2200, 4, 'Deep focus');
-    }
-    if (level <= 299) {
-      return const NormalDifficulty._([20, 21, 22], 9, 2200, 4, 'Deep focus');
-    }
-    if (level <= 399) {
-      return const NormalDifficulty._([22], 9, 2000, 5, 'Pattern mastery');
-    }
-    return const NormalDifficulty._(
-      [22, 23, 24],
-      10,
-      1800,
-      5,
-      'Pattern mastery',
-    );
+    const bands = [
+      (1, [4, 5], 1),
+      (3, [6, 7], 2),
+      (7, [8, 9, 10], 3),
+      (15, [10, 11, 12], 4),
+      (25, [12, 13, 14], 5),
+      (40, [14, 15, 16], 6),
+      (60, [16, 17, 18], 7),
+      (90, [18, 19, 20], 8),
+      (140, [20, 21, 22], 9),
+      (220, [22, 23, 24], 10),
+      (350, [24, 25, 26], 11),
+      (500, [28, 29, 30], 12),
+      (600, [30, 31, 32], 13),
+      (750, [32, 33, 34], 14),
+      (900, [34, 35, 36], 15),
+      (1000, [36, 37, 38], 16),
+      (1100, [38, 39, 40], 17),
+      (1200, [40], 18),
+      (1500, [40], 19),
+      (2000, [40], 20),
+    ];
+    final band = bands.lastWhere((b) => b.$1 <= level);
+    return NormalDifficulty._(level, band.$1, band.$2, band.$3);
   }
 
-  int boxCountForLevel(int level) => boxCounts[(level - 1) % boxCounts.length];
+  int boxCountForLevel(int level) {
+    const opening = [4, 5, 6, 6, 7, 7, 8, 8, 9, 10];
+    if (level <= 10) return opening[level - 1];
+    return boxCounts[(level - firstLevel) % boxCounts.length];
+  }
+
+  int get previewMilliseconds {
+    final baseline = (2000 + 200 * redCount).clamp(3000, 6000);
+    final practiceStart = firstLevel < 100 ? 100 : firstLevel;
+    final steps = level < 100 ? 0 : ((level - practiceStart) ~/ 25).clamp(0, 4);
+    return baseline - steps * 100;
+  }
+
+  int get swapCount => level < 50
+      ? 0
+      : level < 175
+      ? 1
+      : level < 550
+      ? 2
+      : level < 850
+      ? 3
+      : 4;
+  int get swapMilliseconds => level < 100
+      ? 900
+      : level < 275
+      ? 850
+      : level < 675
+      ? 800
+      : level < 975
+      ? 750
+      : level < 1350
+      ? 700
+      : 650;
+  String get label => level < 15
+      ? 'First steps'
+      : level < 50
+      ? 'Finding focus'
+      : level < 175
+      ? 'First moves'
+      : level < 500
+      ? 'Memory paths'
+      : level < 1000
+      ? 'Deep focus'
+      : level < 2000
+      ? 'Pattern mastery'
+      : 'Endless expert';
+  String get chapterHint => level < 50
+      ? 'Learn the shapes. Grow your memory.'
+      : level < 175
+      ? 'Follow one moving pair. Take your time.'
+      : level < 500
+      ? 'More to remember. Familiar, gentle moves.'
+      : level < 1000
+      ? 'Larger patterns. A deeper memory challenge.'
+      : level < 2000
+      ? 'Rich patterns. Keep the reds in mind.'
+      : 'New arrangements. Your expert rhythm.';
 }

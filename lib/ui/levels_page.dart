@@ -32,23 +32,6 @@ class _LevelsPageState extends State<LevelsPage> {
   static const _chapterSize = 50;
   late int _chapter = (widget.settings.level - 1) ~/ _chapterSize;
   final _scroll = ScrollController();
-  late PlayMode _mode;
-
-  @override
-  void initState() {
-    super.initState();
-    _mode = widget.settings.mode;
-    widget.settings.addListener(_modeChanged);
-  }
-
-  void _modeChanged() {
-    if (_mode == widget.settings.mode) return;
-    setState(() {
-      _mode = widget.settings.mode;
-      _chapter = (widget.settings.level - 1) ~/ _chapterSize;
-    });
-    if (_scroll.hasClients) _scroll.jumpTo(0);
-  }
 
   int get _firstLevel => _chapter * _chapterSize + 1;
   int get _lastLevel => _firstLevel + _chapterSize - 1;
@@ -72,6 +55,7 @@ class _LevelsPageState extends State<LevelsPage> {
           sounds: widget.sounds,
           generator: widget.generator,
           initialLevel: level,
+          mode: PlayMode.normal,
         ),
       ),
     );
@@ -146,22 +130,13 @@ class _LevelsPageState extends State<LevelsPage> {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: widget.settings,
     builder: (context, _) {
-      final pace = LevelPace.forLevel(_firstLevel);
       final featuredLevel = widget.settings.level.clamp(
         _firstLevel,
         _lastLevel,
       );
       final difficulty = NormalDifficulty.forLevel(featuredLevel);
-      final featuredLayout = normalPatternForLevel(
-        featuredLevel,
-        boxCount: difficulty.boxCountForLevel(featuredLevel),
-        seed: widget.generator.patternSeed,
-      );
       final currentChapter = (widget.settings.level - 1) ~/ _chapterSize;
       return Scaffold(
-        backgroundColor: widget.settings.mode == PlayMode.zen
-            ? PocketColors.zenBackground
-            : null,
         body: SafeArea(
           child: Center(
             child: ConstrainedBox(
@@ -179,7 +154,7 @@ class _LevelsPageState extends State<LevelsPage> {
                         ),
                         Expanded(
                           child: Text(
-                            '${widget.settings.mode.label.toUpperCase()} LEVELS',
+                            'LEVELS',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 13,
@@ -220,20 +195,14 @@ class _LevelsPageState extends State<LevelsPage> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              widget.settings.mode ==
-                                                      PlayMode.zen
-                                                  ? 'Little steps'
-                                                  : 'One more challenge',
+                                              'Little steps',
                                               style: PocketType.title.copyWith(
                                                 fontSize: 36,
                                               ),
                                             ),
                                             const SizedBox(height: 8),
                                             Text(
-                                              widget.settings.mode ==
-                                                      PlayMode.zen
-                                                  ? 'Revisit a favorite.\nTake your time.'
-                                                  : 'Build your memory.\nBeat your next level.',
+                                              'Build your memory.\nOne little win at a time.',
                                               style: PocketType.body,
                                             ),
                                           ],
@@ -279,54 +248,27 @@ class _LevelsPageState extends State<LevelsPage> {
                                                 ),
                                               ),
                                             ),
-                                            widget.settings.mode == PlayMode.zen
-                                                ? _PaceBadge(pace: pace)
-                                                : const Text(
-                                                    'Normal',
-                                                    style: PocketType.body,
-                                                  ),
+                                            const Icon(
+                                              Icons.auto_awesome_rounded,
+                                              size: 18,
+                                              color: PocketColors.redDepth,
+                                            ),
                                           ],
                                         ),
                                         const SizedBox(height: 12),
                                         Text(
-                                          widget.settings.mode == PlayMode.zen
-                                              ? pace.title
-                                              : '${difficulty.label} · ${featuredLayout.name}',
+                                          difficulty.label,
                                           style: PocketType.title.copyWith(
                                             fontSize: 25,
                                           ),
                                         ),
                                         const SizedBox(height: 5),
                                         Text(
-                                          widget.settings.mode == PlayMode.zen
-                                              ? pace.description
-                                              : 'Level $featuredLevel · ${featuredLayout.boxCount} boxes · ${difficulty.redCount} to remember · ${featuredLayout.boxCount - difficulty.redCount} to tap. ${difficulty.swapCount == 0 ? 'Still shapes. Shuffles start at 20.' : '${difficulty.swapCount} ${difficulty.swapCount == 1 ? 'swap' : 'swaps'} to follow.'}',
+                                          difficulty.chapterHint,
                                           style: PocketType.body.copyWith(
                                             fontSize: 13,
                                           ),
                                         ),
-                                        if (widget.settings.mode ==
-                                                PlayMode.zen &&
-                                            _firstLevel > 50) ...[
-                                          const SizedBox(height: 12),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.spa_outlined,
-                                                size: 15,
-                                                color: PocketColors.redDepth,
-                                              ),
-                                              const SizedBox(width: 7),
-                                              Flexible(
-                                                child: Text(
-                                                  'Easy moments every 5 levels',
-                                                  style: PocketType.body
-                                                      .copyWith(fontSize: 12),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
                                       ],
                                     ),
                                   ),
@@ -405,9 +347,8 @@ class _LevelsPageState extends State<LevelsPage> {
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: constraints.maxWidth < 350
-                                        ? 3
-                                        : 4,
-                                    childAspectRatio: .78,
+                                        ? 4
+                                        : 5,
                                     mainAxisSpacing: 13,
                                     crossAxisSpacing: 12,
                                   ),
@@ -418,8 +359,6 @@ class _LevelsPageState extends State<LevelsPage> {
                                 final level = _firstLevel + index;
                                 return _LevelTile(
                                   level: level,
-                                  seed: widget.generator.patternSeed,
-                                  mode: widget.settings.mode,
                                   current: level == widget.settings.level,
                                   completed: level < widget.settings.level,
                                   onTap: level <= widget.settings.level
@@ -467,9 +406,7 @@ class _LevelsPageState extends State<LevelsPage> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          widget.settings.mode == PlayMode.zen
-                              ? 'No finish line. No hurry.'
-                              : 'Your Normal progress · Zen is saved separately',
+                          'Every little win is yours to revisit.',
                           style: PocketType.body.copyWith(fontSize: 12),
                         ),
                       ],
@@ -486,73 +423,34 @@ class _LevelsPageState extends State<LevelsPage> {
 
   @override
   void dispose() {
-    widget.settings.removeListener(_modeChanged);
     _scroll.dispose();
     super.dispose();
   }
 }
 
-class _PaceBadge extends StatelessWidget {
-  const _PaceBadge({required this.pace});
-  final LevelPace pace;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      color: PocketColors.cream,
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Text(
-      pace.label,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w800,
-        color: PocketColors.ink,
-      ),
-    ),
-  );
-}
-
 class _LevelTile extends StatelessWidget {
   const _LevelTile({
     required this.level,
-    required this.seed,
-    required this.mode,
     required this.current,
     required this.completed,
     required this.onTap,
   });
 
   final int level;
-  final int seed;
-  final PlayMode mode;
   final bool current;
   final bool completed;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final difficulty = NormalDifficulty.forLevel(level);
-    final layout = mode == PlayMode.zen
-        ? patternForLevel(level, seed: seed)
-        : normalPatternForLevel(
-            level,
-            boxCount: difficulty.boxCountForLevel(level),
-            seed: seed,
-          );
-    final reds = mode == PlayMode.zen
-        ? redBoxCountForLevel(level)
-        : difficulty.redCount;
     final locked = onTap == null;
-    final breather = mode == PlayMode.zen && isBreatherLevel(level);
     return Semantics(
       label:
-          'Level $level, ${layout.name}, ${layout.boxCount} boxes, $reds red, ${current
+          'Level $level, ${current
               ? 'ready to play'
               : completed
               ? 'completed, replay'
-              : 'locked'}${breather ? ', easy moment' : ''}',
+              : 'locked'}',
       button: true,
       enabled: !locked,
       onTap: onTap,
@@ -585,55 +483,22 @@ class _LevelTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
               child: Stack(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 7, 8, 6),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 24,
-                          child: FittedBox(
-                            child: Text(
-                              '$level',
-                              style: PocketType.title.copyWith(
-                                fontSize: 20,
-                                color: current
-                                    ? PocketColors.buttonInk
-                                    : PocketColors.ink,
-                              ),
-                            ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(9),
+                      child: FittedBox(
+                        child: Text(
+                          '$level',
+                          style: PocketType.title.copyWith(
+                            fontSize: 22,
+                            color: current
+                                ? PocketColors.buttonInk
+                                : PocketColors.ink.withValues(
+                                    alpha: locked ? .5 : 1,
+                                  ),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Expanded(
-                          child: SizedBox.expand(
-                            child: CustomPaint(
-                              painter: _ShapePreview(
-                                layout,
-                                current
-                                    ? PocketColors.buttonInk
-                                    : PocketColors.muted.withValues(
-                                        alpha: locked ? .5 : .85,
-                                      ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        SizedBox(
-                          height: 15,
-                          child: FittedBox(
-                            child: Text(
-                              '$reds red',
-                              style: PocketType.body.copyWith(
-                                fontSize: 10,
-                                color: current
-                                    ? PocketColors.buttonInk
-                                    : PocketColors.muted,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   if (completed || locked)
@@ -650,18 +515,6 @@ class _LevelTile extends StatelessWidget {
                             : PocketColors.muted.withValues(alpha: .6),
                       ),
                     ),
-                  if (breather)
-                    Positioned(
-                      left: 5,
-                      top: 5,
-                      child: Icon(
-                        Icons.spa_outlined,
-                        size: 11,
-                        color: current
-                            ? PocketColors.buttonInk
-                            : PocketColors.redDepth,
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -670,41 +523,4 @@ class _LevelTile extends StatelessWidget {
       ),
     );
   }
-}
-
-// Show the level's stable silhouette, never its randomized red positions.
-class _ShapePreview extends CustomPainter {
-  const _ShapePreview(this.layout, this.color);
-  final BoardLayout layout;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cell = (size.width / layout.columns).clamp(
-      0.0,
-      size.height / layout.rows,
-    );
-    final left = (size.width - cell * layout.columns) / 2;
-    final top = (size.height - cell * layout.rows) / 2;
-    final paint = Paint()..color = color;
-    for (var i = 0; i < layout.slots.length; i++) {
-      if (layout.slots[i] == null) continue;
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(
-            left + i % layout.columns * cell + cell * .1,
-            top + i ~/ layout.columns * cell + cell * .1,
-            cell * .8,
-            cell * .8,
-          ),
-          Radius.circular(cell * .16),
-        ),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_ShapePreview oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.layout != layout;
 }

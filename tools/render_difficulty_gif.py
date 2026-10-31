@@ -14,14 +14,14 @@ OUTPUT = ROOT / "docs/difficulty/shuffle.gif"
 
 
 def main():
-    frames = [Image.open(FRAMES / f"{i:02}.png").convert("RGB") for i in range(17)]
+    frames = [Image.open(FRAMES / f"{i:02}.png").convert("RGB") for i in range(21)]
     try:
         OUTPUT.parent.mkdir(parents=True, exist_ok=True)
         frames[0].save(
             OUTPUT,
             save_all=True,
             append_images=frames[1:],
-            duration=[2760] + [70] * 4 + [65] * 10 + [180, 1000],
+            duration=[2960] + [70] * 4 + [65] * 14 + [180, 1000],
             loop=0,
             disposal=2,
         )

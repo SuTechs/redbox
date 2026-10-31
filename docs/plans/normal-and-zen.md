@@ -1,3 +1,7 @@
+> Historical implementation notes. The current approved design and curve are in
+> [progression-redesign.md](progression-redesign.md). Zen is now level-free;
+> the old numbered Zen policy and Home shortcut below are superseded.
+
 # Normal progression and Zen mode
 
 ## Intent

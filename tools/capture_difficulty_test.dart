@@ -33,8 +33,7 @@ void main() {
 
     final frame = GlobalKey();
     final settings = AppSettings(store: MemorySettingsStore())
-      ..normalLevel = 20
-      ..zenLevel = 73
+      ..normalLevel = 50
       ..haptics = false;
     Future<void> mount() => tester.pumpWidget(
       RepaintBoundary(
@@ -80,22 +79,22 @@ void main() {
     await tester.pump(const Duration(milliseconds: 240));
     await save('docs/difficulty/02-normal-preview.png');
     await save('release-private/difficulty-frames/00.png');
-    await tester.pump(const Duration(milliseconds: 2760));
+    await tester.pump(const Duration(milliseconds: 2960));
     for (var step = 0; step < 4; step++) {
       await save(
         'release-private/difficulty-frames/${(step + 1).toString().padLeft(2, '0')}.png',
       );
       await tester.pump(const Duration(milliseconds: 70));
     }
-    for (var step = 0; step <= 10; step++) {
+    for (var step = 0; step <= 14; step++) {
       await save(
         'release-private/difficulty-frames/${(step + 5).toString().padLeft(2, '0')}.png',
       );
       if (step == 5) await save('docs/difficulty/03-normal-shuffle.png');
-      if (step < 10) await tester.pump(const Duration(milliseconds: 65));
+      if (step < 14) await tester.pump(const Duration(milliseconds: 65));
     }
     await tester.pump(const Duration(milliseconds: 180));
-    await save('release-private/difficulty-frames/16.png');
+    await save('release-private/difficulty-frames/20.png');
 
     await tester.pumpWidget(const SizedBox());
     settings.normalLevel = 1;
@@ -105,14 +104,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 240));
     await save('docs/difficulty/09-first-step.png');
     await tester.pumpWidget(const SizedBox());
-    settings.normalLevel = 400;
+    settings.normalLevel = 1300;
     await mount();
     await tester.pumpAndSettle();
     await tap(find.byKey(const ValueKey('play')));
     await tester.pump(const Duration(milliseconds: 240));
     await save('docs/difficulty/04-normal-expert.png');
     await tester.pumpWidget(const SizedBox());
-    settings.update(mode: PlayMode.zen);
     await mount();
     await tester.pumpAndSettle();
     await tap(find.byKey(const ValueKey('play-zen')));
@@ -127,7 +125,6 @@ void main() {
     tester.view.physicalSize = const Size(320, 568);
     tester.view.padding = const FakeViewPadding(top: 20);
     addTearDown(tester.view.resetPadding);
-    settings.update(mode: PlayMode.normal);
     await mount();
     await tester.pumpAndSettle();
     expect(

@@ -1,36 +1,31 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:redbox/core/settings.dart';
+import 'package:redbox/core/sound.dart';
 import 'package:redbox/core/music.dart';
 import 'package:redbox/core/music_track.dart';
-import 'package:redbox/core/sound.dart';
 import 'package:redbox/game/round.dart';
+import 'package:redbox/game/game_controller.dart';
 import 'package:redbox/main.dart';
 import 'package:redbox/ui/pocket_widgets.dart';
-import 'package:redbox/ui/pocket_theme.dart';
 
 class RecordingSounds implements SoundEffects {
-  final List<GameCue> played = [];
-  int stops = 0;
+  final played = <GameCue>[];
   @override
   Future<void> play(GameCue cue) async {
     played.add(cue);
   }
 
   @override
-  Future<void> stop() async {
-    stops++;
-  }
-
+  Future<void> stop() async {}
   @override
   Future<void> dispose() async {}
 }
 
 class RecordingMusic implements MusicPlayback {
-  final List<MusicTrack> played = [];
+  final played = <MusicTrack>[];
   @override
   Future<void> play(MusicTrack track) async {
     played.add(track);
@@ -44,810 +39,293 @@ class RecordingMusic implements MusicPlayback {
   Future<void> dispose() async {}
 }
 
-Future<(AppSettings, RecordingSounds)> mount(
-  WidgetTester tester, {
+Future<AppSettings> mount(
+  WidgetTester t, {
   int level = 1,
-  double scale = 1,
-  PlayMode mode = PlayMode.zen,
-  bool reducedMotion = true,
+  bool reduced = true,
 }) async {
-  final settings = AppSettings(store: MemorySettingsStore())
-    ..mode = mode
+  if (t.view.physicalSize / t.view.devicePixelRatio == const Size(800, 600)) {
+    viewport(t, const Size(390, 844));
+  }
+  final s = AppSettings(store: MemorySettingsStore())
     ..level = level
-    ..reducedMotion = reducedMotion
+    ..reducedMotion = reduced
     ..haptics = false;
-  final sounds = RecordingSounds();
-  await tester.pumpWidget(
+  await t.pumpWidget(
     RedBoxApp(
-      settings: settings,
-      sounds: sounds,
+      settings: s,
+      sounds: RecordingSounds(),
       musicPlayback: RecordingMusic(),
       generator: RoundGenerator(random: Random(42)),
     ),
   );
-  if (scale != 1) {
-    await tester.pumpWidget(
-      MediaQuery(
-        data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-        child: RedBoxApp(
-          settings: settings,
-          sounds: sounds,
-          musicPlayback: RecordingMusic(),
-          generator: RoundGenerator(random: Random(42)),
-        ),
-      ),
-    );
+  return s;
+}
+
+Future<void> tap(WidgetTester t, Finder f) async {
+  await t.ensureVisible(f);
+  await t.tap(f);
+  await t.pump();
+}
+
+Future<void> begin(WidgetTester t, {bool zen = false}) async {
+  await tap(t, find.byKey(ValueKey(zen ? 'play-zen' : 'play')));
+  await t.pump();
+}
+
+List<PocketTile> tiles(WidgetTester t) =>
+    t.widgetList<PocketTile>(find.byType(PocketTile)).toList();
+Future<void> finish(
+  WidgetTester t, {
+  Duration preview = const Duration(seconds: 3),
+}) async {
+  final reds = tiles(t).where((x) => x.red).map((x) => x.id).toSet();
+  await t.pump(preview);
+  for (final tile in tiles(t).where((x) => !reds.contains(x.id))) {
+    await tap(t, find.byKey(ValueKey('box-${tile.id}')));
   }
-  return (settings, sounds);
 }
 
-Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-  await tester.ensureVisible(finder);
-  await tester.pump();
-  await tester.tap(finder);
-  await tester.pump();
+void viewport(WidgetTester t, Size size, {double scale = 1}) {
+  t.view.physicalSize = size;
+  t.view.devicePixelRatio = 1;
+  t.view.padding = const FakeViewPadding(top: 20, bottom: 20);
+  t.platformDispatcher.textScaleFactorTestValue = scale;
+  addTearDown(t.view.resetPhysicalSize);
+  addTearDown(t.view.resetDevicePixelRatio);
+  addTearDown(t.view.resetPadding);
+  addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);
 }
-
-Future<void> begin(WidgetTester tester) async {
-  final mode = tester.widget<RedBoxApp>(find.byType(RedBoxApp)).settings.mode;
-  final play = find.byKey(ValueKey(mode == PlayMode.zen ? 'play-zen' : 'play'));
-  await tester.ensureVisible(play);
-  await tapVisible(tester, play);
-  await tester.pump();
-}
-
-Future<void> showLevel(WidgetTester tester, int level) =>
-    tester.scrollUntilVisible(
-      find.byKey(ValueKey('level-$level')),
-      160,
-      scrollable: find.descendant(
-        of: find.byType(CustomScrollView),
-        matching: find.byType(Scrollable),
-      ),
-    );
-
-List<int> tileIds(WidgetTester tester) => tester
-    .widgetList<PocketTile>(find.byType(PocketTile))
-    .map((tile) => tile.id)
-    .toList();
 
 void main() {
   testWidgets(
-    'Home lotus enters Zen and main Play resumes Normal independently',
-    (tester) async {
-      final (settings, _) = await mount(tester, level: 7);
-      expect(settings.zenLevel, 7);
-      expect(find.text('Normal'), findsNothing);
-      expect(find.text('Zen'), findsNothing);
-      await tapVisible(tester, find.byKey(const ValueKey('play-zen')));
-      expect(settings.mode, PlayMode.zen);
-      expect(find.text('Zen · Easy'), findsOneWidget);
+    'Home places Zen below Continue, Levels below Settings, both play actions visible',
+    (t) async {
+      viewport(t, const Size(320, 568));
+      final s = await mount(t, level: 1300);
+      final play = t.getRect(find.byKey(const ValueKey('play')));
+      final zen = t.getRect(find.byKey(const ValueKey('play-zen')));
+      expect(zen.top, greaterThan(play.bottom));
+      expect(zen.bottom, lessThanOrEqualTo(548));
       expect(
-        tester.widget<PocketPage>(find.byType(PocketPage)).backgroundColor,
-        PocketColors.zenBackground,
+        t.getRect(find.byKey(const ValueKey('browse-levels'))).top,
+        greaterThanOrEqualTo(t.getRect(find.byTooltip('Settings')).bottom),
       );
-      await tapVisible(tester, find.byTooltip('Return home'));
-      await tester.pumpAndSettle();
-      await tapVisible(tester, find.byKey(const ValueKey('play')));
-      expect(settings.mode, PlayMode.normal);
-      expect(settings.level, 1);
-      final reds = tester
-          .widgetList<PocketTile>(find.byType(PocketTile))
-          .where((tile) => tile.red)
-          .map((tile) => tile.id)
-          .toSet();
-      expect(reds.length, 1);
-      await tester.pump(const Duration(seconds: 3));
-      for (final id in tileIds(tester).where((id) => !reds.contains(id))) {
-        await tapVisible(tester, find.byKey(ValueKey('box-$id')));
-      }
+      expect(find.text('Play Zen'), findsOneWidget);
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
+    },
+  );
+  testWidgets(
+    'Normal wins unlock levels; Zen wins and retries never touch progress',
+    (t) async {
+      final s = await mount(t);
+      await begin(t);
+      await finish(t);
+      expect(s.level, 2);
       expect(find.text('Lovely!'), findsOneWidget);
-      expect(settings.normalLevel, 2);
-      expect(settings.zenLevel, 7);
-      await tapVisible(tester, find.byTooltip('Return home'));
-      await tester.pumpAndSettle();
-      await tapVisible(tester, find.byKey(const ValueKey('play-zen')));
-      expect(settings.level, 7);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
+      await tap(t, find.byTooltip('Return home'));
+      await t.pumpAndSettle();
+      await begin(t, zen: true);
+      expect(find.textContaining('LEVEL'), findsNothing);
+      final mask = tiles(t).map((x) => x.id).toList();
+      final reds = tiles(t).where((x) => x.red).map((x) => x.id).toSet();
+      await t.pump(const Duration(seconds: 3));
+      await tap(t, find.byKey(ValueKey('box-${reds.first}')));
+      expect(find.text('Have another look'), findsOneWidget);
+      await tap(t, find.byKey(const ValueKey('retry')));
+      expect(tiles(t).map((x) => x.id).toList(), mask);
+      expect(tiles(t).where((x) => x.red).map((x) => x.id).toSet(), reds);
+      await finish(t);
+      expect(find.text('Another board'), findsOneWidget);
+      expect(s.level, 2);
+      await tap(t, find.byKey(const ValueKey('next-level')));
+      expect(find.textContaining('LEVEL'), findsNothing);
+      expect(s.level, 2);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
     },
   );
-
   testWidgets(
-    'Settings switches Zen and the levels page follows that progress',
-    (tester) async {
-      final (settings, _) = await mount(tester, level: 73);
-      await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
-      await tester.pumpAndSettle();
-      expect(find.text('ZEN LEVELS'), findsOneWidget);
-      expect(find.text('51–100'), findsOneWidget);
-      await tapVisible(tester, find.byTooltip('Settings'));
-      await tester.pumpAndSettle();
-      await tapVisible(tester, find.widgetWithText(SwitchListTile, 'Zen mode'));
-      await tapVisible(tester, find.byTooltip('Close'));
-      await tester.pumpAndSettle();
-      expect(settings.mode, PlayMode.normal);
-      expect(find.text('NORMAL LEVELS'), findsOneWidget);
-      expect(find.text('1–50'), findsOneWidget);
-      expect(find.text('Play level 1'), findsOneWidget);
-      expect(find.text('Easy moments every 5 levels'), findsNothing);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
+    'Settings has audio, comfort and privacy, with no Zen mode switch',
+    (t) async {
+      final s = await mount(t);
+      await tap(t, find.byTooltip('Settings'));
+      await t.pumpAndSettle();
+      expect(find.widgetWithText(SwitchListTile, 'Zen mode'), findsNothing);
+      await tap(t, find.text('Mute all audio'));
+      expect(s.sound, false);
+      expect(s.musicEnabled, false);
+      await tap(t, find.text('Extra time'));
+      expect(s.previewSeconds, 5);
+      await tap(t, find.text('Privacy & about'));
+      await t.pumpAndSettle();
+      expect(find.text('redbox@sutechs.com'), findsOneWidget);
+      expect(find.textContaining('We do not collect or share'), findsOneWidget);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
     },
   );
-
   testWidgets(
-    'Level browser shows real shapes, counts and chapter-specific guidance',
-    (tester) async {
-      tester.view.physicalSize = const Size(320, 568);
-      tester.view.devicePixelRatio = 1;
-      tester.platformDispatcher.textScaleFactorTestValue = 1.4;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      final semantics = tester.ensureSemantics();
-      final (settings, _) = await mount(tester, mode: PlayMode.normal);
-      await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
-      await tester.pumpAndSettle();
-      expect(
-        find.textContaining('First steps · Little square'),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining('4 boxes · 1 to remember · 3 to tap'),
-        findsOneWidget,
-      );
-      expect(find.text('A growing challenge'), findsNothing);
-      await showLevel(tester, 1);
-      expect(
-        find.bySemanticsLabel(
-          RegExp('Level 1, Little square, 4 boxes, 1 red, ready to play'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('1 red'), findsWidgets);
-      await tapVisible(tester, find.byTooltip('Next 50 levels'));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('Building rhythm ·'), findsOneWidget);
-      expect(find.textContaining('Level 51 ·'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-      semantics.dispose();
-      settings.dispose();
+    'Levels stays Normal after Zen, has numbered tiles and can replay without losing unlocks',
+    (t) async {
+      final s = await mount(t, level: 1300);
+      await begin(t, zen: true);
+      await tap(t, find.byTooltip('Return home'));
+      await t.pumpAndSettle();
+      await tap(t, find.byKey(const ValueKey('browse-levels')));
+      await t.pumpAndSettle();
+      expect(find.text('LEVELS'), findsOneWidget);
+      expect(find.text('1251–1300'), findsOneWidget);
+      expect(find.text('Pattern mastery'), findsOneWidget);
+      expect(find.textContaining(RegExp(r'\d+ red')), findsNothing);
+      await tap(t, find.text('1251–1300'));
+      await t.pumpAndSettle();
+      await t.enterText(find.byKey(const ValueKey('level-number')), '1');
+      await tap(t, find.text('Play this level'));
+      await t.pumpAndSettle();
+      expect(find.text('LEVEL 01'), findsOneWidget);
+      expect(tiles(t).length, 4);
+      expect(s.level, 1300);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
     },
   );
+  for (final size in [
+    const Size(320, 568),
+    const Size(568, 320),
+    const Size(390, 844),
+    const Size(844, 390),
+  ]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets(
+        'Dense 1300 board and all shuffle frames fit $size at text $scale',
+        (t) async {
+          viewport(t, size, scale: scale);
+          final s = await mount(t, level: 1300, reduced: false);
+          await begin(t);
+          expect(tiles(t).length, 40);
+          expect(tiles(t).where((x) => x.red).length, 18);
+          final originalReds = tiles(t)
+              .where((x) => x.red)
+              .map((x) => x.id)
+              .toSet();
+          void check() {
+            for (final x in tiles(t)) {
+              final r = t.getRect(find.byKey(ValueKey('box-${x.id}')));
+              expect(r.width, greaterThanOrEqualTo(48 - 0.01));
+              expect(r.height, closeTo(r.width, .01));
+              expect(r.left, greaterThanOrEqualTo(0));
+              expect(r.right, lessThanOrEqualTo(size.width));
+              expect(r.top, greaterThanOrEqualTo(20));
+              expect(r.bottom, lessThanOrEqualTo(size.height - 20));
+            }
+            expect(t.takeException(), isNull);
+          }
 
-  testWidgets(
-    'A visible shuffle moves square boxes, hides red and locks taps',
-    (tester) async {
-      final (settings, _) = await mount(
-        tester,
-        level: 20,
-        mode: PlayMode.normal,
-        reducedMotion: false,
-      );
-      await begin(tester);
-      final red = tester
-          .widgetList<PocketTile>(find.byType(PocketTile))
-          .firstWhere((tile) => tile.red)
-          .id;
-      final original = tester.getRect(find.byKey(ValueKey('box-$red')));
-      await tester.pump(const Duration(milliseconds: 3000));
-      await tester.pump(const Duration(milliseconds: 280));
-      expect(find.text('Follow the boxes'), findsOneWidget);
-      expect(
-        tester
-            .widgetList<PocketTile>(find.byType(PocketTile))
-            .every((tile) => tile.onTap == null && !tile.red),
-        isTrue,
-      );
-      // The animation has its own frames before the settling interval ends.
-      await tester.pump(const Duration(milliseconds: 325));
-      final moved = tester.getRect(find.byKey(ValueKey('box-$red')));
-      expect(moved.topLeft, isNot(original.topLeft));
-      expect(moved.width, closeTo(moved.height, .01));
-      await tester.pump(const Duration(milliseconds: 505));
-      expect(find.text('Tap the others'), findsOneWidget);
-      expect(
-        tester
-            .widgetList<PocketTile>(find.byType(PocketTile))
-            .every((tile) => tile.onTap != null),
-        isTrue,
-      );
-      await tapVisible(tester, find.byKey(ValueKey('box-$red')));
-      expect(find.text("Let's try that again"), findsOneWidget);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
-    },
-  );
-
-  testWidgets(
-    'Edge shuffle paths keep every tile inside the board on a phone',
-    (tester) async {
-      tester.view.physicalSize = const Size(320, 568);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final (settings, _) = await mount(
-        tester,
-        level: 20,
-        mode: PlayMode.normal,
-        reducedMotion: false,
-      );
-      await begin(tester);
-      await tester.pump(const Duration(seconds: 3));
-      await tester.pump(const Duration(milliseconds: 280));
-      final board = tester
-          .getRect(find.byKey(const ValueKey('game-board')))
-          .inflate(.01);
-      for (var frame = 0; frame <= 10; frame++) {
-        for (final id in tileIds(tester)) {
-          final rect = tester.getRect(find.byKey(ValueKey('box-$id')));
+          check();
+          await t.pump(const Duration(milliseconds: 5200));
+          await t.pump(const Duration(milliseconds: 280));
+          for (var pair = 0; pair < 4; pair++) {
+            for (var f = 0; f < 10; f++) {
+              check();
+              expect(tiles(t).every((x) => x.onTap == null), true);
+              await t.pump(const Duration(milliseconds: 70));
+            }
+            await t.pump(GameController.swapSettle);
+          }
+          check();
+          expect(tiles(t).every((x) => x.onTap != null), true);
+          // Rotation must reveal the same red identities on the fitted profile.
+          t.view.physicalSize = Size(size.height, size.width);
+          await t.pump();
           expect(
-            board.contains(rect.topLeft),
-            isTrue,
-            reason: 'Tile $id at frame $frame',
+            tiles(t).where((x) => x.red).map((x) => x.id).toSet(),
+            originalReds,
           );
-          expect(
-            board.contains(rect.bottomRight),
-            isTrue,
-            reason: 'Tile $id at frame $frame',
-          );
-        }
-        await tester.pump(const Duration(milliseconds: 65));
-      }
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
-    },
-  );
-
-  testWidgets('An active round cannot change modes in pause settings', (
-    tester,
-  ) async {
-    final (settings, _) = await mount(tester, mode: PlayMode.normal);
-    await begin(tester);
-    await tapVisible(tester, find.byTooltip('Pause game'));
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Music & sound'));
-    await tester.pumpAndSettle();
-    final toggle = tester.widget<SwitchListTile>(
-      find.widgetWithText(SwitchListTile, 'Zen mode'),
-    );
-    expect(toggle.onChanged, isNull);
-    expect(find.text('Return home to change modes'), findsOneWidget);
-    expect(settings.mode, PlayMode.normal);
-    await tester.pumpWidget(const SizedBox());
-    settings.dispose();
-  });
-
-  testWidgets(
-    'Turning on reduced motion during a shuffle reveals a fair preview',
-    (tester) async {
-      final (settings, _) = await mount(
-        tester,
-        level: 20,
-        mode: PlayMode.normal,
-        reducedMotion: false,
+          expect(t.takeException(), isNull);
+          await t.pumpWidget(const SizedBox());
+          s.dispose();
+        },
       );
-      await begin(tester);
-      await tester.pump(const Duration(milliseconds: 3000));
-      await tester.pump(const Duration(milliseconds: 280));
-      expect(find.text('Follow the boxes'), findsOneWidget);
-      settings.update(reducedMotion: true);
-      await tester.pump();
-      expect(find.text('Watch the red boxes'), findsOneWidget);
-      expect(
-        tester
-            .widgetList<PocketTile>(find.byType(PocketTile))
-            .where((tile) => tile.red)
-            .length,
-        4,
-      );
-      await tester.pump(const Duration(milliseconds: 3000));
-      expect(find.text('Tap the others'), findsOneWidget);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
-    },
-  );
-
-  for (final textScale in [1.2, 1.4, 1.8, 2.0]) {
-    testWidgets(
-      'Normal board remains reachable at system text scale $textScale',
-      (tester) async {
-        tester.view.physicalSize = const Size(320, 568);
-        tester.view.devicePixelRatio = 1;
-        tester.platformDispatcher.textScaleFactorTestValue = textScale;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-        final (settings, _) = await mount(
-          tester,
-          level: 151,
-          mode: PlayMode.normal,
-        );
-        final homeError = tester.takeException();
-        expect(homeError, isNull, reason: 'Home with large text');
-        await begin(tester);
-        final gameError = tester.takeException();
-        expect(gameError, isNull, reason: 'Game with large text');
-        await tester.pump();
-        final board = tester.getRect(find.byKey(const ValueKey('game-board')));
-        expect(board.top, greaterThanOrEqualTo(0));
-        expect(board.bottom, lessThanOrEqualTo(568));
-        await tester.ensureVisible(
-          find.byKey(ValueKey('box-${tileIds(tester).last}')),
-        );
-        await tester.pump();
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox());
-        settings.dispose();
-      },
-    );
+    }
   }
-
-  for (final level in [10, 40, 100, 151, 1000]) {
-    testWidgets(
-      'Normal level $level keeps 48px square targets on a small phone',
-      (tester) async {
-        tester.view.physicalSize = const Size(320, 568);
-        tester.view.devicePixelRatio = 1;
-        tester.view.padding = const FakeViewPadding(top: 20);
-        addTearDown(tester.view.resetPadding);
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-        final (settings, _) = await mount(
-          tester,
-          level: level,
-          mode: PlayMode.normal,
-        );
-        await begin(tester);
-        for (final tile in find.byType(PocketTile).evaluate()) {
-          final rect = tester.getRect(find.byWidget(tile.widget));
-          expect(rect.width, greaterThanOrEqualTo(48));
-          expect(rect.height, closeTo(rect.width, .01));
-          expect(rect.top, greaterThanOrEqualTo(20));
-          expect(rect.bottom, lessThanOrEqualTo(568));
-          expect(rect.left, greaterThanOrEqualTo(0));
-          expect(rect.right, lessThanOrEqualTo(320));
-        }
-        final last = find.byKey(ValueKey('box-${tileIds(tester).last}'));
-        await tester.ensureVisible(last);
-        await tester.pump();
-        expect(tester.getRect(last).bottom, lessThanOrEqualTo(568));
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox());
-        settings.dispose();
-      },
-    );
-  }
-
   testWidgets(
-    'Landscape previews show a whole large board and rotation replays it',
-    (tester) async {
-      tester.view.physicalSize = const Size(568, 320);
-      tester.view.devicePixelRatio = 1;
-      tester.view.padding = const FakeViewPadding(top: 20);
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      addTearDown(tester.view.resetPadding);
-      final (settings, _) = await mount(
-        tester,
-        level: 400,
-        mode: PlayMode.normal,
-      );
-      await begin(tester);
-      await tester.pump();
-      final previewReds = tester
-          .widgetList<PocketTile>(find.byType(PocketTile))
-          .where((tile) => tile.red)
-          .map((tile) => tile.id)
-          .toSet();
-      expect(previewReds.length, 10);
-      for (final tile in find.byType(PocketTile).evaluate()) {
-        final rect = tester.getRect(find.byWidget(tile.widget));
-        expect(rect.width, greaterThanOrEqualTo(48));
-        expect(rect.height, closeTo(rect.width, .01));
-        expect(rect.top, greaterThanOrEqualTo(20));
-        expect(rect.bottom, lessThanOrEqualTo(320));
-      }
-      await tester.pump(const Duration(milliseconds: 1800));
-      expect(find.text('Tap the others'), findsOneWidget);
-      tester.view.physicalSize = const Size(320, 568);
-      await tester.pump();
-      expect(find.text('Watch the red boxes'), findsOneWidget);
-      expect(
-        tester
-            .widgetList<PocketTile>(find.byType(PocketTile))
-            .where((tile) => tile.red)
-            .map((tile) => tile.id)
-            .toSet(),
-        previewReds,
-      );
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
+    'Mid-shuffle reduced motion replays visible identities and stops movement',
+    (t) async {
+      viewport(t, const Size(320, 568));
+      final s = await mount(t, level: 50, reduced: false);
+      await begin(t);
+      final reds = tiles(t).where((x) => x.red).map((x) => x.id).toSet();
+      await t.pump(const Duration(milliseconds: 3200));
+      await t.pump(const Duration(milliseconds: 280));
+      expect(tiles(t).every((x) => !x.red && x.onTap == null), true);
+      s.update(reducedMotion: true);
+      await t.pump();
+      expect(tiles(t).where((x) => x.red).map((x) => x.id).toSet(), reds);
+      await t.pump(const Duration(milliseconds: 3200));
+      expect(tiles(t).every((x) => x.onTap != null), true);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
     },
   );
-
-  testWidgets('Privacy policy and support are available inside settings', (
-    tester,
-  ) async {
-    final (settings, _) = await mount(tester);
-    await tapVisible(tester, find.byTooltip('Settings'));
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Privacy & about'));
-    await tester.pumpAndSettle();
-    expect(find.text('redbox@sutechs.com'), findsOneWidget);
-    expect(
-      find.textContaining('Privacy policy · Red Box by SuTechs'),
-      findsOneWidget,
-    );
-    expect(find.textContaining('We do not collect or share'), findsOneWidget);
-    await tapVisible(tester, find.text('Open-source licenses'));
-    await tester.pumpAndSettle();
-    expect(find.text('Licenses'), findsOneWidget);
-    await tester.pumpWidget(const SizedBox());
-    settings.dispose();
-  });
-
-  testWidgets('Home, tutorial and sound settings work', (tester) async {
-    final (settings, sounds) = await mount(tester);
-    expect(find.text('Red Box'), findsNWidgets(2));
-    await tapVisible(tester, find.text('How to play'));
-    await tester.pumpAndSettle();
-    expect(find.text('Tap the others'), findsOneWidget);
-    await tapVisible(tester, find.text('Got it'));
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.byTooltip('Settings'));
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Soft sounds'));
-    await tester.pump();
-    expect(settings.sound, isFalse);
-    expect(sounds.stops, 1);
-    await tapVisible(tester, find.text('Extra time'));
-    await tester.pump();
-    expect(settings.previewSeconds, 5);
-    await tapVisible(tester, find.text('Warm keys'));
-    await tester.pump();
-    expect(settings.musicTrack, MusicTrack.warmKeys);
-    expect(settings.musicEnabled, isTrue);
-    await tapVisible(tester, find.text('Mute all audio'));
-    expect(settings.sound, isFalse);
-    expect(settings.musicEnabled, isFalse);
-    await tester.pumpWidget(const SizedBox());
-    settings.dispose();
-  });
-
   testWidgets(
-    'Full round wires correct, wrong, retry, next and continue sounds',
-    (tester) async {
-      final (settings, sounds) = await mount(tester);
-      await begin(tester);
-      final originalRed = tester
-          .widgetList<PocketTile>(find.byType(PocketTile))
-          .where((tile) => tile.red)
-          .map((tile) => tile.id)
-          .toSet();
-      expect(originalRed.length, 1);
-      await tester.pump(const Duration(seconds: 3));
-      expect(find.text('Tap the others'), findsOneWidget);
-      var safe = tileIds(tester)
-          .where((id) => !originalRed.contains(id))
-          .toList();
-      await tapVisible(tester, find.byKey(ValueKey('box-${safe.first}')));
-      await tester.pump();
-      expect(sounds.played.last, GameCue.tap);
-      await tapVisible(
-        tester,
-        find.byKey(ValueKey('box-${originalRed.single}')),
-      );
-      await tester.pump();
-      expect(find.text("Let's try that again"), findsOneWidget);
-      expect(sounds.played.last, GameCue.wrong);
-      await tapVisible(tester, find.byKey(const ValueKey('retry')));
-      await tester.pump();
-      final retriedRed = tester
-          .widgetList<PocketTile>(find.byType(PocketTile))
-          .where((tile) => tile.red)
-          .map((tile) => tile.id)
-          .toSet();
-      expect(retriedRed, isNot(originalRed));
-      safe = tileIds(tester).where((id) => !retriedRed.contains(id)).toList();
-      await tester.pump(const Duration(seconds: 3));
-      for (final id in safe) {
-        await tapVisible(tester, find.byKey(ValueKey('box-$id')));
-        await tester.pump();
-      }
-      expect(find.text('Lovely!'), findsOneWidget);
-      expect(settings.level, 2);
-      expect(sounds.played.last, GameCue.complete);
-      await tapVisible(tester, find.byKey(const ValueKey('next-level')));
-      await tester.pump();
-      expect(find.text('LEVEL 02'), findsOneWidget);
-      expect(
-        tester.widgetList<PocketTile>(find.byType(PocketTile)).length,
-        patternForLevel(2).boxCount,
-      );
-      expect(sounds.played.last, GameCue.continueRound);
-      await tapVisible(tester, find.byTooltip('Pause game'));
-      await tester.pumpAndSettle();
-      expect(find.text('Take a breath'), findsWidgets);
-      await tapVisible(tester, find.text('Continue'));
-      await tester.pumpAndSettle();
-      expect(find.text('Watch the red box'), findsOneWidget);
-      await tapVisible(tester, find.byTooltip('Return home'));
-      await tester.pumpAndSettle();
-      expect(find.text("Let's play"), findsOneWidget);
-      expect(settings.zenLevel, 2);
-      expect(settings.normalLevel, 1);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
+    'Zen pause can skip to a new shaped board and has no mode toggle',
+    (t) async {
+      final s = await mount(t, level: 600);
+      await begin(t, zen: true);
+      await tap(t, find.byTooltip('Pause game'));
+      await t.pumpAndSettle();
+      await tap(t, find.text('Music & sound'));
+      await t.pumpAndSettle();
+      expect(find.widgetWithText(SwitchListTile, 'Zen mode'), findsNothing);
+      await tap(t, find.byTooltip('Close'));
+      await t.pumpAndSettle();
+      await tap(t, find.text('New board'));
+      await t.pumpAndSettle();
+      expect(tiles(t), isNotEmpty);
+      expect(find.textContaining('LEVEL'), findsNothing);
+      expect(s.level, 600);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
     },
   );
-
-  testWidgets('Level numbers keep increasing after the early progression', (
-    tester,
-  ) async {
-    final (settings, sounds) = await mount(tester, level: 10000);
-    await begin(tester);
-    final red = tester
-        .widgetList<PocketTile>(find.byType(PocketTile))
-        .where((tile) => tile.red)
-        .map((tile) => tile.id)
-        .toSet();
-    final safe = tester
-        .widgetList<PocketTile>(find.byType(PocketTile))
-        .map((tile) => tile.id)
-        .where((id) => !red.contains(id))
-        .toList();
-    await tester.pump(const Duration(seconds: 3));
-    for (final id in safe) {
-      await tapVisible(tester, find.byKey(ValueKey('box-$id')));
-      await tester.pump();
-    }
-    expect(find.text('Lovely!'), findsOneWidget);
-    await tapVisible(tester, find.byKey(const ValueKey('next-level')));
-    await tester.pump();
-    expect(find.text('LEVEL 10001'), findsOneWidget);
-    expect(settings.level, 10001);
-    expect(sounds.played, contains(GameCue.complete));
-    await tester.pumpWidget(const SizedBox());
-    settings.dispose();
-  });
-
-  testWidgets('A new round never carries old red paint into its preview', (
-    tester,
-  ) async {
-    final (settings, _) = await mount(tester);
-    settings.update(reducedMotion: false);
-    await tester.pump();
-    await begin(tester);
-    final red = tester
-        .widgetList<PocketTile>(find.byType(PocketTile))
-        .where((tile) => tile.red)
-        .map((tile) => tile.id)
-        .toSet();
-    await tester.pump(const Duration(seconds: 3));
-    await tester.pump(const Duration(milliseconds: 280));
-    for (final id in tileIds(tester).where((id) => !red.contains(id))) {
-      await tapVisible(tester, find.byKey(ValueKey('box-$id')));
-    }
-    await tester.pump(const Duration(milliseconds: 300));
-    await tapVisible(tester, find.byKey(const ValueKey('next-level')));
-    final tiles = find.byType(PocketTile);
-    for (var i = 0; i < tiles.evaluate().length; i++) {
-      final tile = tester.widget<PocketTile>(tiles.at(i));
-      if (!tile.red) {
-        final paint = tester.widget<DecoratedBox>(
-          find
-              .descendant(of: tiles.at(i), matching: find.byType(DecoratedBox))
-              .first,
-        );
-        expect((paint.decoration as BoxDecoration).color, PocketColors.tile);
-      }
-    }
-    await tester.pumpWidget(const SizedBox());
-    settings.dispose();
-  });
-
-  testWidgets('Levels replay previous rounds without rolling back progress', (
-    tester,
-  ) async {
-    final (settings, _) = await mount(tester, level: 7);
-    await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
-    await tester.pumpAndSettle();
-    expect(find.text('Little steps'), findsOneWidget);
-    expect(find.text('Easy'), findsOneWidget);
-    expect(find.text('Play level 7'), findsOneWidget);
-    await showLevel(tester, 8);
-    expect(
-      tester.widget<InkWell>(find.byKey(const ValueKey('level-8'))).onTap,
-      isNull,
-    );
-    await tapVisible(tester, find.byKey(const ValueKey('level-2')));
-    final originalRed = tester
-        .widgetList<PocketTile>(find.byType(PocketTile))
-        .where((tile) => tile.red)
-        .map((tile) => tile.id)
-        .toSet();
-    expect(find.text('LEVEL 02'), findsOneWidget);
-    expect(find.text('Zen · Easy'), findsOneWidget);
-    await tester.pump(const Duration(seconds: 3));
-    for (final id in tileIds(tester).where((id) => !originalRed.contains(id))) {
-      await tapVisible(tester, find.byKey(ValueKey('box-$id')));
-    }
-    expect(find.text('Lovely!'), findsOneWidget);
-    expect(settings.level, 7);
-    await tapVisible(tester, find.byTooltip('Back to levels'));
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.byKey(const ValueKey('level-2')));
-    final replayRed = tester
-        .widgetList<PocketTile>(find.byType(PocketTile))
-        .where((tile) => tile.red)
-        .map((tile) => tile.id)
-        .toSet();
-    expect(replayRed, isNot(originalRed));
-    await tester.pumpWidget(const SizedBox());
-    settings.dispose();
-  });
-
   testWidgets(
-    'Level chapters stay bounded, show difficulty and unlock the next chapter',
-    (tester) async {
-      final (settings, _) = await mount(tester, level: 50);
-      await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
-      await tester.pumpAndSettle();
-      await tapVisible(tester, find.byTooltip('Next 50 levels'));
-      expect(find.text('Gentle'), findsOneWidget);
-      await showLevel(tester, 51);
-      expect(
-        tester.widget<InkWell>(find.byKey(const ValueKey('level-51'))).onTap,
-        isNull,
-      );
-      await tapVisible(
-        tester,
-        find.byKey(const ValueKey('play-current-level')),
-      );
-      final red = tester
-          .widgetList<PocketTile>(find.byType(PocketTile))
-          .where((tile) => tile.red)
-          .map((tile) => tile.id)
-          .toSet();
-      await tester.pump(const Duration(seconds: 3));
-      for (final id in tileIds(tester).where((id) => !red.contains(id))) {
-        await tapVisible(tester, find.byKey(ValueKey('box-$id')));
-      }
-      expect(settings.level, 51);
-      await tapVisible(tester, find.byTooltip('Back to levels'));
-      await tester.pumpAndSettle();
-      expect(find.text('Play level 51'), findsOneWidget);
-      await showLevel(tester, 51);
-      expect(
-        tester.widget<InkWell>(find.byKey(const ValueKey('level-51'))).onTap,
-        isNotNull,
-      );
-      await tapVisible(tester, find.byKey(const ValueKey('level-51')));
-      expect(find.text('Zen · Gentle'), findsOneWidget);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
+    'Zen rotation preserves remembered identities across spacious and focused layouts',
+    (t) async {
+      viewport(t, const Size(390, 844));
+      final s = await mount(t, level: 600);
+      await begin(t, zen: true);
+      final reds = tiles(t).where((x) => x.red).map((x) => x.id).toSet();
+      t.view.physicalSize = const Size(844, 390);
+      await t.pump();
+      expect(tiles(t).where((x) => x.red).map((x) => x.id).toSet(), reds);
+      expect(t.takeException(), isNull);
+      await finish(t);
+      expect(s.level, 600);
+      await tap(t, find.byKey(const ValueKey('next-level')));
+      expect(tiles(t).where((x) => x.red).length, inInclusiveRange(1, 2));
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
     },
   );
-
   testWidgets(
-    'A very late level page can reach earlier chapters on a small screen',
-    (tester) async {
-      tester.view.physicalSize = const Size(320, 568);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final (settings, _) = await mount(tester, level: 10000);
-      await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
-      await tester.pumpAndSettle();
-      expect(find.text('9951–10000'), findsOneWidget);
-      expect(find.text('Endless'), findsOneWidget);
-      await showLevel(tester, 9951);
+    'Dense reduced-motion board can be won and its next action remains visible',
+    (t) async {
+      viewport(t, const Size(320, 568), scale: 2);
+      final s = await mount(t, level: 1300);
+      await begin(t);
+      await finish(t, preview: const Duration(milliseconds: 5200));
+      expect(s.level, 1301);
       expect(
-        tester
-            .widget<SliverGrid>(find.byType(SliverGrid))
-            .delegate
-            .estimatedChildCount,
-        50,
+        t.getRect(find.byKey(const ValueKey('next-level'))).bottom,
+        lessThanOrEqualTo(548),
       );
-      await tapVisible(tester, find.byTooltip('Previous 50 levels'));
-      expect(find.text('9901–9950'), findsOneWidget);
-      await tapVisible(tester, find.text('Back to your current levels'));
-      expect(find.text('9951–10000'), findsOneWidget);
-      await showLevel(tester, 9951);
-      final tile = tester.getSize(find.byKey(const ValueKey('level-9951')));
-      expect(tile.width, greaterThanOrEqualTo(48));
-      expect(tile.height, greaterThanOrEqualTo(48));
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
+      expect(t.takeException(), isNull);
+      await t.pumpWidget(const SizedBox());
+      s.dispose();
     },
   );
-
-  testWidgets(
-    'The level picker reaches any unlocked level and rejects a locked one',
-    (tester) async {
-      final (settings, _) = await mount(tester, level: 10000);
-      await tapVisible(tester, find.byKey(const ValueKey('browse-levels')));
-      await tester.pumpAndSettle();
-      await tapVisible(tester, find.text('9951–10000'));
-      await tester.pumpAndSettle();
-      await tester.enterText(
-        find.byKey(const ValueKey('level-number')),
-        '10001',
-      );
-      await tapVisible(tester, find.text('Play this level'));
-      expect(find.text('Choose a level from 1 to 10000'), findsOneWidget);
-      await tester.enterText(find.byKey(const ValueKey('level-number')), '2');
-      await tapVisible(tester, find.text('Play this level'));
-      await tester.pumpAndSettle();
-      expect(find.text('LEVEL 02'), findsOneWidget);
-      expect(settings.level, 10000);
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
-    },
-  );
-
-  for (final level in [1, 2, 3, 4, 5, 50, 70, 100, 1000]) {
-    testWidgets(
-      'Small screen keeps all level $level boxes square, reachable and large enough',
-      (tester) async {
-        tester.view.physicalSize = const Size(320, 568);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-        final (settings, _) = await mount(tester, level: level);
-        await begin(tester);
-        await tester.pump(const Duration(seconds: 3));
-        final grid = tester.getRect(find.byKey(const ValueKey('game-board')));
-        expect(grid.top, greaterThanOrEqualTo(0));
-        expect(grid.bottom, lessThanOrEqualTo(568));
-        final tiles = find.byType(PocketTile);
-        expect(
-          tiles.evaluate().length,
-          RoundGenerator(random: Random(42)).generate(level).layout.boxCount,
-        );
-        for (var i = 0; i < tiles.evaluate().length; i++) {
-          final rect = tester.getRect(tiles.at(i));
-          expect(rect.width, greaterThanOrEqualTo(48));
-          expect(rect.height, closeTo(rect.width, .01));
-          expect(rect.bottom, lessThanOrEqualTo(grid.bottom + .01));
-        }
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox());
-        settings.dispose();
-      },
-    );
-  }
-  testWidgets('Small-phone Home keeps the primary play action visible', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(320, 568);
-    tester.view.devicePixelRatio = 1;
-    tester.view.padding = const FakeViewPadding(top: 20);
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.view.resetPadding);
-    for (final family in ['Fredoka', 'Nunito']) {
-      await (FontLoader(
-        family,
-      )..addFont(rootBundle.load('assets/fonts/$family.ttf'))).load();
-    }
-    for (final mode in PlayMode.values) {
-      final (settings, _) = await mount(tester, mode: mode, level: 7);
-      final action = tester.getRect(find.byKey(const ValueKey('play')));
-      expect(action.top, greaterThanOrEqualTo(20));
-      expect(
-        action.bottom,
-        lessThanOrEqualTo(568),
-        reason: '${mode.label}: play must be visible without scrolling',
-      );
-      await tester.pumpWidget(const SizedBox());
-      settings.dispose();
-    }
-  });
 }

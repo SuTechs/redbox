@@ -5,172 +5,142 @@ import 'package:redbox/game/game_controller.dart';
 import 'package:redbox/game/round.dart';
 
 void main() {
-  test('Normal grows in memory load, speed, board size and movement', () {
-    var previousReds = 0;
-    var previousPreview = 3000;
-    var previousSwaps = 0;
-    for (var level = 1; level <= 2000; level++) {
-      final difficulty = NormalDifficulty.forLevel(level);
-      expect(difficulty.redCount, inInclusiveRange(previousReds, 10));
-      expect(
-        difficulty.previewMilliseconds,
-        inInclusiveRange(1800, previousPreview),
-      );
-      expect(difficulty.swapCount, inInclusiveRange(previousSwaps, 5));
-      expect(difficulty.boxCountForLevel(level), inInclusiveRange(4, 24));
-      previousReds = difficulty.redCount;
-      previousPreview = difficulty.previewMilliseconds;
-      previousSwaps = difficulty.swapCount;
+  test('Normal memory grows through 2,000; preview respects memory load', () {
+    var previous = 0;
+    for (var level = 1; level <= 10000; level++) {
+      final d = NormalDifficulty.forLevel(level);
+      expect(d.redCount, inInclusiveRange(previous, 20));
+      expect(d.boxCountForLevel(level), inInclusiveRange(4, 40));
+      expect(d.boxCountForLevel(level) - d.redCount, inInclusiveRange(3, 23));
+      expect(d.swapCount, inInclusiveRange(0, 4));
+      previous = d.redCount;
     }
-    expect(NormalDifficulty.forLevel(1).redCount, 1);
-    expect(NormalDifficulty.forLevel(5).redCount, 2);
-    expect(NormalDifficulty.forLevel(19).swapCount, 0);
-    expect(NormalDifficulty.forLevel(20).swapCount, 1);
-    expect(NormalDifficulty.forLevel(400).redCount, 10);
+    for (final (l, r, ms, moves) in [
+      (1, 1, 3000, 0),
+      (300, 10, 3700, 2),
+      (500, 12, 4400, 2),
+      (600, 13, 4600, 3),
+      (1296, 18, 5300, 4),
+      (1300, 18, 5200, 4),
+      (2000, 20, 6000, 4),
+    ]) {
+      final d = NormalDifficulty.forLevel(l);
+      expect((d.redCount, d.previewMilliseconds, d.swapCount), (r, ms, moves));
+    }
+    expect(
+      List.generate(
+        10,
+        (i) => NormalDifficulty.forLevel(i + 1).boxCountForLevel(i + 1),
+      ),
+      [4, 5, 6, 6, 7, 7, 8, 8, 9, 10],
+    );
     expect(() => NormalDifficulty.forLevel(0), throwsArgumentError);
   });
-
-  test(
-    'Opening teaches memory without busywork and holds speed for 29 levels',
-    () {
-      final counts = [4, 5, 6, 6, 7, 8, 8, 9, 9, 10];
-      final reds = [1, 1, 2, 2, 2, 3, 3, 3, 3, 4];
-      for (var level = 1; level <= 10; level++) {
-        final d = NormalDifficulty.forLevel(level);
-        expect(d.boxCountForLevel(level), counts[level - 1]);
-        expect(d.redCount, reds[level - 1]);
-      }
-      for (var level = 1; level <= 2000; level++) {
-        final d = NormalDifficulty.forLevel(level);
-        expect(
-          d.redCount / d.boxCountForLevel(level),
-          greaterThanOrEqualTo(.2),
-        );
-        expect(d.boxCountForLevel(level) - d.redCount, lessThanOrEqualTo(14));
-        if (level < 30) expect(d.previewMilliseconds, 3000);
-      }
-    },
-  );
-
-  test(
-    'Small-to-large Normal patterns are seeded, connected and phone-sized',
-    () {
-      final generator = RoundGenerator(random: Random(71));
-      final masks = <String>{};
-      for (final seed in [-17, 1, 42, 20261002]) {
-        String? previousMask;
-        for (var level = 1; level <= 1000; level++) {
-          final difficulty = NormalDifficulty.forLevel(level);
-          final count = difficulty.boxCountForLevel(level);
-          final layout = normalPatternForLevel(
-            level,
+  test('Seeded Normal shapes are connected and fit both layout profiles', () {
+    for (final seed in [-17, 42, 20261002]) {
+      for (final profile in LayoutProfile.values) {
+        String? previous;
+        for (var l = 1; l <= 2100; l++) {
+          final d = NormalDifficulty.forLevel(l);
+          final count = d.boxCountForLevel(l);
+          final b = normalPatternForLevel(
+            l,
             boxCount: count,
             seed: seed,
+            profile: profile,
+          );
+          expect(b.boxCount, count);
+          expect(
+            b.mask,
+            normalPatternForLevel(
+              l,
+              boxCount: count,
+              seed: seed,
+              profile: profile,
+            ).mask,
           );
           expect(
-            layout.mask,
-            normalPatternForLevel(level, boxCount: count, seed: seed).mask,
+            b.columns,
+            lessThanOrEqualTo(profile == LayoutProfile.portrait ? 6 : 9),
           );
-          expect(layout.boxCount, count);
-          expect(layout.columns, inInclusiveRange(2, 5));
-          expect(layout.rows, inInclusiveRange(2, 7));
           expect(
-            layout.slots.whereType<int>().toList(),
-            List.generate(count, (i) => i),
+            b.rows,
+            lessThanOrEqualTo(profile == LayoutProfile.portrait ? 8 : 5),
           );
-          final cells = {
-            for (var i = 0; i < layout.slots.length; i++)
-              if (layout.slots[i] != null) i,
-          };
-          final reached = {cells.first};
-          final queue = [cells.first];
-          for (var i = 0; i < queue.length; i++) {
-            final slot = queue[i];
-            for (final neighbor in [
-              slot - layout.columns,
-              slot + layout.columns,
-              if (slot % layout.columns > 0) slot - 1,
-              if (slot % layout.columns < layout.columns - 1) slot + 1,
-            ]) {
-              if (cells.contains(neighbor) && reached.add(neighbor)) {
-                queue.add(neighbor);
-              }
-            }
-          }
+          expect(connected(b), true, reason: 'level $l $profile seed $seed');
+          final key = b.mask.join('/');
           expect(
-            reached,
-            cells,
-            reason: 'Disconnected level $level seed $seed',
+            key,
+            isNot(previous),
+            reason: 'repeated shape $l $profile seed $seed',
           );
-          final mask = layout.mask.join('/');
-          expect(
-            mask,
-            isNot(previousMask),
-            reason: 'Repeated adjacent shape at level $level seed $seed',
-          );
-          previousMask = mask;
-          masks.add(mask);
-          final round = generator.generate(level, mode: PlayMode.normal);
-          expect(round.redIds.length, difficulty.redCount);
-          expect(round.safeCount, inInclusiveRange(3, 14));
-          expect(round.swaps.length, difficulty.swapCount);
-          final moved = <int>{};
-          for (final (red, safe) in round.swaps) {
-            expect(round.redIds, contains(red));
-            expect(round.redIds, isNot(contains(safe)));
-            expect(moved.add(red), isTrue);
-            expect(moved.add(safe), isTrue);
-          }
+          previous = key;
         }
       }
-      expect(masks.length, greaterThan(20));
-    },
-  );
-
-  test(
-    'Retries vary reds independently per mode and keep each seeded shape',
-    () {
-      final generator = RoundGenerator(random: Random(91));
-      for (final mode in PlayMode.values) {
-        for (final level in [1, 5, 10, 50, 100, 150, 1000, 1000000]) {
-          var previous = generator.generate(level, mode: mode);
-          for (var attempt = 0; attempt < 20; attempt++) {
-            final fresh = generator.generate(level, mode: mode);
-            expect(fresh.redIds, isNot(previous.redIds));
-            expect(fresh.layout.mask, previous.layout.mask);
-            previous = fresh;
-          }
-        }
+    }
+  });
+  test('Late forty-box levels have broad seeded variety, rather than a short shape cycle', () {
+    for (final profile in LayoutProfile.values) {
+      final shapes = <String>{};
+      for (var l = 1200; l < 2200; l++) {
+        shapes.add(
+          normalPatternForLevel(
+            l,
+            boxCount: 40,
+            seed: 42,
+            profile: profile,
+          ).mask.join('/'),
+        );
       }
-    },
-  );
-
+      expect(shapes.length, greaterThan(100), reason: '$profile');
+    }
+  });
   test(
-    'Zen retains the original patterns, memory load and preview options',
+    'Zen is an endless shuffled deck of beautiful non-rectangular easy shapes',
     () {
-      for (final level in [1, 50, 70, 100, 150, 151, 1000, 1000000]) {
-        final round = RoundGenerator().generate(level, mode: PlayMode.zen);
-        expect(round.layout.mask, patternForLevel(level).mask);
-        expect(round.redIds.length, redBoxCountForLevel(level));
-        expect(round.swaps, isEmpty);
-        expect(round.previewDuration(seconds: 5), const Duration(seconds: 5));
+      final g = RoundGenerator(random: Random(42));
+      String? previous;
+      final families = <String>{};
+      for (var i = 0; i < 1000; i++) {
+        final r = g.generateZen();
+        expect(r.level, 0);
+        expect(r.layout.boxCount, inInclusiveRange(6, 16));
+        expect(r.layout.boxCount, lessThan(r.layout.rows * r.layout.columns));
+        expect(connected(r.layout), true);
+        expect(r.layout.name, isNot(previous));
+        expect(r.redIds.length, inInclusiveRange(1, 2));
+        if (r.layout.boxCount < 10) expect(r.redIds.length, 1);
+        expect(r.swaps, isEmpty);
+        expect(r.previewDuration(), const Duration(seconds: 3));
+        families.add(r.layout.name);
+        previous = r.layout.name;
       }
-      final normal = RoundGenerator().generate(400, mode: PlayMode.normal);
-      expect(normal.previewDuration(), const Duration(milliseconds: 1800));
-      expect(
-        normal.previewDuration(seconds: 5),
-        greaterThan(normal.previewDuration()),
-      );
+      expect(families.length, greaterThan(12));
     },
   );
-
+  test('Retry changes Normal reds, preserves shapes and uses disjoint identity swaps', () {
+    final g = RoundGenerator(random: Random(5));
+    for (final l in [1, 50, 300, 500, 600, 1296, 1300, 2000, 10000]) {
+      final a = g.generate(l);
+      final b = g.generate(l);
+      expect(a.redIds, isNot(b.redIds));
+      expect(a.layout.mask, b.layout.mask);
+      final moved = <int>{};
+      for (final (red, safe) in a.swaps) {
+        expect(a.redIds, contains(red));
+        expect(a.redIds, isNot(contains(safe)));
+        expect(moved.add(red), true);
+        expect(moved.add(safe), true);
+      }
+    }
+  });
   testWidgets(
     'Swaps carry remembered identities, lock input and allow a full win',
     (tester) async {
       final game = GameController(generator: RoundGenerator(random: Random(7)));
       addTearDown(game.dispose);
       game.start(
-        20,
+        50,
         mode: PlayMode.normal,
         preview: const Duration(milliseconds: 10),
       );
@@ -188,9 +158,7 @@ void main() {
         expect(game.shuffleStep, i + 1);
         expect(game.tap(safe.first), TapResult.ignored);
         expect(game.round.redIds.any(game.isRed), isFalse);
-        await tester.pump(
-          GameController.swapDuration + GameController.swapSettle,
-        );
+        await tester.pump(game.swapDuration + GameController.swapSettle);
       }
       expect(game.phase, RoundPhase.input);
       for (final (red, safe) in game.round.swaps) {
@@ -211,12 +179,12 @@ void main() {
   ) async {
     final game = GameController(generator: RoundGenerator(random: Random(8)));
     addTearDown(game.dispose);
-    game.start(20, mode: PlayMode.normal, preview: Duration.zero);
+    game.start(50, mode: PlayMode.normal, preview: Duration.zero);
     final original = Map.of(game.positions);
     final initial = game.round;
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 280));
-    await tester.pump(GameController.swapDuration + GameController.swapSettle);
+    await tester.pump(game.swapDuration + GameController.swapSettle);
     expect(game.tap(initial.swaps.first.$1), TapResult.wrong);
     expect(game.phase, RoundPhase.retry);
     game.retry(preview: Duration.zero);
@@ -240,7 +208,7 @@ void main() {
         );
         addTearDown(game.dispose);
         game.start(
-          20,
+          50,
           mode: PlayMode.normal,
           preview: const Duration(seconds: 1),
         );
@@ -253,9 +221,7 @@ void main() {
           await tester.pump(const Duration(milliseconds: 280));
         }
         if (pausePhase == RoundPhase.input) {
-          await tester.pump(
-            GameController.swapDuration + GameController.swapSettle,
-          );
+          await tester.pump(game.swapDuration + GameController.swapSettle);
         }
         expect(game.phase, pausePhase);
         game.pause();
@@ -268,9 +234,7 @@ void main() {
         expect(game.positions, original);
         await tester.pump(const Duration(seconds: 1));
         await tester.pump(const Duration(milliseconds: 280));
-        await tester.pump(
-          GameController.swapDuration + GameController.swapSettle,
-        );
+        await tester.pump(game.swapDuration + GameController.swapSettle);
         expect(game.phase, RoundPhase.input);
         for (final (red, safe) in round.swaps) {
           expect(game.positions[red], original[safe]);
@@ -291,7 +255,7 @@ void main() {
         reducedMotion: true,
       );
       final original = Map.of(game.positions);
-      expect(game.round.swaps.length, 5);
+      expect(game.round.swaps.length, 2);
       expect(game.willShuffle, isFalse);
       await tester.pump(const Duration(milliseconds: 10));
       expect(game.phase, RoundPhase.input);
@@ -314,4 +278,25 @@ void main() {
     await tester.pump(const Duration(seconds: 30));
     expect(notifications, 0);
   });
+}
+
+bool connected(BoardLayout b) {
+  final cells = {
+    for (var i = 0; i < b.slots.length; i++)
+      if (b.slots[i] != null) i,
+  };
+  final seen = {cells.first};
+  final queue = [cells.first];
+  for (var i = 0; i < queue.length; i++) {
+    final p = queue[i];
+    for (final n in [
+      p - b.columns,
+      p + b.columns,
+      if (p % b.columns > 0) p - 1,
+      if (p % b.columns < b.columns - 1) p + 1,
+    ]) {
+      if (cells.contains(n) && seen.add(n)) queue.add(n);
+    }
+  }
+  return seen.length == cells.length;
 }

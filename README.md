@@ -33,17 +33,19 @@ Red Box is a warm, tactile memory game with two ways to play: **Normal** builds 
 
 ## Two ways to play
 
-- **Normal:** starts with 4 boxes and one red, grows to 10 boxes across the first ten levels, and eventually reaches 22–24 boxes, up to 10 reds, shorter previews, and up to five visible pair swaps. Shuffles begin at level 20. The curve caps at a playable challenge; the levels keep going.
-- **Zen:** the original relaxed experience — varied 6–16-box shapes, one to three reds, 3/5-second previews, easy moments, and no shuffles.
+- **Normal:** a numbered memory challenge, starting with four boxes and one red. Red counts grow to 12 at level 500, 18 at level 1,300 and 20 at level 2,000. Larger boards reach 40 squares. Viewing time follows memory load; visible shuffles begin at 50 and grow to four pairs.
+- **Zen:** random, easy shaped boards with no levels. Enjoy petals, leaves, ribbons, arches and other connected silhouettes—never a plain filled square or rectangle. Remember one red, occasionally two; there are no shuffles or speed increases.
 
-The main Play button opens Normal. Tap the **lotus icon beside Settings** to jump straight into Zen, with warm cream, sage accents, and a lotus badge. The level browser follows your last-played mode; its Settings let you switch tracks. Each mode saves its own progress. Updating from v1 preserves your old levels in Zen and starts Normal at level 1. Reduced motion disables shuffles, and **Extra time** offers longer Normal previews. There is no countdown while tapping in either mode.
+The primary **Continue** action resumes Normal. **Play Zen** sits directly underneath. The **Levels** icon is below Settings and always opens Normal's numbered levels, with no shape previews. Each Normal level keeps its seeded shape while retries choose fresh reds. Zen's **Another board** starts a new random silhouette; **Another look** gently replays a mistaken board.
 
-The [difficulty plan](docs/plans/normal-and-zen.md) records the curve and fairness rules. [First level](docs/difficulty/09-first-step.png), [level browser](docs/difficulty/08-level-shapes.png), [Normal preview](docs/difficulty/02-normal-preview.png), [shuffle](docs/difficulty/shuffle.gif), and [late Normal board](docs/difficulty/04-normal-expert.png) show the real Flutter UI. Regenerate with `flutter test tools/capture_difficulty_test.dart` followed by `python3 tools/render_difficulty_gif.py` (requires Pillow).
+Existing Normal unlocks and audio/comfort preferences survive updates. Old v1/Zen counters are retained only as archived migration data and never promote a casual player into a high Normal level. Reduced motion disables swaps; Extra time extends previews. Neither mode has a countdown while tapping.
+
+The [approved progression plan](docs/plans/progression-redesign.md) includes the full curve, design critiques and responsive constraints. Real Flutter captures show [level 1](docs/difficulty/normal-1.png), [level 500](docs/difficulty/normal-500.png), [level 1,300](docs/difficulty/normal-1300.png), [Zen](docs/difficulty/05-zen-preview.png), and the [level browser](docs/difficulty/08-level-shapes.png). Regenerate milestones and Zen examples with `flutter test tools/capture_progression_test.dart`. For the timed shuffle GIF, run `flutter test tools/capture_difficulty_test.dart` then `python3 tools/render_difficulty_gif.py` (Pillow required).
 
 ## The little things
 
-- **Endless, varied Zen shapes.** Seeded silhouettes use 6–16 square boxes; the opening boards have 6, 8, 10, 12, and 9. A gentle curve begins with one red box and gradually mixes one to three.
-- **Fresh memories.** Retries and replays choose new red positions. Pause and resume preserve the round.
+- **Beautiful Zen shapes.** A shuffled deck of named, non-rectangular silhouettes uses 6–16 square boxes, with no consecutive shape-family repeats or difficulty ladder.
+- **Fresh memories.** Normal retries and replays choose new red positions; Zen’s Another look replays the same easy board. Pause and resume preserve the round.
 - **Little steps.** Browse unlocked levels, replay a favorite, or jump to a previous level without losing your progress.
 - **Your own quiet soundtrack.** Two original ambient loops, Cloud drift and Warm keys, gentle tap sounds, separate audio switches, and one action to mute everything.
 - **Comfort controls.** Longer previews, reduced motion, optional haptics, and a symbol cue for red boxes.

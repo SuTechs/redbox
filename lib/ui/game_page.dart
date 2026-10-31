@@ -19,11 +19,13 @@ class GamePage extends StatefulWidget {
     required this.sounds,
     required this.generator,
     this.initialLevel,
+    required this.mode,
   });
   final AppSettings settings;
   final SoundEffects sounds;
   final RoundGenerator generator;
   final int? initialLevel;
+  final PlayMode mode;
   @override
   State<GamePage> createState() => _GamePageState();
 }
@@ -45,7 +47,7 @@ class _GamePageState extends State<GamePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _mode = widget.settings.mode;
+    _mode = widget.mode;
     _glow = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1300),
@@ -64,18 +66,20 @@ class _GamePageState extends State<GamePage>
     if (!_started) {
       _started = true;
       _game.start(
-        widget.initialLevel ?? widget.settings.level,
+        _mode == PlayMode.zen
+            ? 0
+            : widget.initialLevel ?? widget.settings.level,
         mode: _mode,
+        profile: landscape ? LayoutProfile.landscape : LayoutProfile.portrait,
         previewSeconds: widget.settings.previewSeconds,
         reducedMotion: _reduced,
       );
-    } else if (rotated &&
-        ![
-          RoundPhase.complete,
-          RoundPhase.retry,
-          RoundPhase.paused,
-        ].contains(_game.phase)) {
-      _game.replay(preview: _preview, reducedMotion: _reduced);
+    } else if (rotated) {
+      _game.fit(
+        landscape ? LayoutProfile.landscape : LayoutProfile.portrait,
+        preview: _preview,
+        reducedMotion: _reduced,
+      );
     } else if (_reduced) {
       _glow.stop();
       if (_game.willShuffle &&
@@ -140,7 +144,9 @@ class _GamePageState extends State<GamePage>
       builder: (sheetContext) => PopScope(
         canPop: false,
         child: PocketSheet(
-          title: 'Take a breath',
+          title: _mode == PlayMode.zen
+              ? 'A little pause'
+              : 'Level ${_game.round.level}',
           close: false,
           children: [
             const Text(
@@ -153,7 +159,7 @@ class _GamePageState extends State<GamePage>
                 sheetContext,
                 widget.settings,
                 widget.sounds,
-                allowModeChange: false,
+                previewMode: _mode,
               ),
               icon: const Icon(Icons.music_note_rounded, size: 18),
               label: const Text('Music & sound'),
@@ -169,6 +175,15 @@ class _GamePageState extends State<GamePage>
                 unawaited(widget.sounds.play(GameCue.continueRound));
               },
             ),
+            if (_mode == PlayMode.zen)
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  _nextBoard();
+                },
+                icon: const Icon(Icons.spa_outlined),
+                label: const Text('New board'),
+              ),
             const SizedBox(height: 13),
             PocketButton(
               label: widget.initialLevel == null
@@ -195,7 +210,9 @@ class _GamePageState extends State<GamePage>
       case TapResult.correct:
         unawaited(widget.sounds.play(GameCue.tap));
       case TapResult.complete:
-        widget.settings.unlock(_game.round.level + 1, mode: _game.round.mode);
+        if (_mode == PlayMode.normal) {
+          widget.settings.unlock(_game.round.level + 1);
+        }
         unawaited(widget.sounds.play(GameCue.complete));
       case TapResult.wrong:
         unawaited(widget.sounds.play(GameCue.wrong));
@@ -220,7 +237,7 @@ class _GamePageState extends State<GamePage>
     RoundPhase.input => ('Tap the others', 'Leave the ones that glowed.'),
     RoundPhase.complete => ('Lovely!', 'Ready for one more?'),
     RoundPhase.retry => (
-      "Let's try that again",
+      _mode == PlayMode.zen ? 'Have another look' : "Let's try that again",
       'These were the boxes to leave.',
     ),
     RoundPhase.paused => ('Take a breath', 'Nothing to rush.'),
@@ -230,13 +247,23 @@ class _GamePageState extends State<GamePage>
     listenable: _game,
     builder: (context, _) {
       final (title, subtitle) = _instruction;
-      final compact = MediaQuery.sizeOf(context).height < 700;
+      final size = MediaQuery.sizeOf(context);
+      if (_game.round.layout.boxCount > 24 ||
+          size.height < 700 ||
+          size.width > size.height ||
+          MediaQuery.textScalerOf(context).scale(16) > 20) {
+        return _focusedGame(context, title);
+      }
+      final compact = size.height < 700;
       final progress = switch (_game.phase) {
         RoundPhase.preview || RoundPhase.fade => 'Just watch for a moment',
         RoundPhase.shuffle =>
           'Swap ${_game.shuffleStep} of ${_game.round.swaps.length} · Just watch',
         RoundPhase.complete => 'Every safe box found',
-        RoundPhase.retry => 'A fresh pattern when you try again.',
+        RoundPhase.retry =>
+          _mode == PlayMode.zen
+              ? 'No hurry. Have another look.'
+              : 'Fresh reds when you try again.',
         RoundPhase.paused => 'Your round is waiting',
         RoundPhase.input =>
           '${_game.selectedCount} of ${_game.round.safeCount} found',
@@ -281,7 +308,9 @@ class _GamePageState extends State<GamePage>
                 ),
                 Flexible(
                   child: Text(
-                    'LEVEL ${_game.round.level.toString().padLeft(2, '0')}',
+                    _mode == PlayMode.zen
+                        ? 'ZEN'
+                        : 'LEVEL ${_game.round.level.toString().padLeft(2, '0')}',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
@@ -383,13 +412,14 @@ class _GamePageState extends State<GamePage>
             if (_game.phase == RoundPhase.complete)
               PocketButton(
                 key: const ValueKey('next-level'),
-                label: 'Next level',
+                label: _mode == PlayMode.zen ? 'Another board' : 'Next level',
                 icon: Icons.arrow_forward_rounded,
                 onPressed: () {
                   unawaited(widget.sounds.play(GameCue.continueRound));
                   _game.start(
-                    _game.round.level + 1,
+                    _mode == PlayMode.zen ? 0 : _game.round.level + 1,
                     mode: _mode,
+                    profile: _game.round.profile,
                     previewSeconds: widget.settings.previewSeconds,
                     reducedMotion: _reduced,
                   );
@@ -398,7 +428,7 @@ class _GamePageState extends State<GamePage>
             else if (_game.phase == RoundPhase.retry)
               PocketButton(
                 key: const ValueKey('retry'),
-                label: 'Try again',
+                label: _mode == PlayMode.zen ? 'Another look' : 'Try again',
                 icon: Icons.replay_rounded,
                 onPressed: () {
                   unawaited(widget.sounds.play(GameCue.continueRound));
@@ -426,6 +456,259 @@ class _GamePageState extends State<GamePage>
       );
     },
   );
+  void _nextBoard() {
+    unawaited(widget.sounds.play(GameCue.continueRound));
+    _game.start(
+      _mode == PlayMode.zen ? 0 : _game.round.level + 1,
+      mode: _mode,
+      profile: _game.round.profile,
+      previewSeconds: widget.settings.previewSeconds,
+      reducedMotion: _reduced,
+    );
+  }
+
+  Widget _focusedGame(BuildContext context, String title) {
+    final landscape =
+        MediaQuery.sizeOf(context).width > MediaQuery.sizeOf(context).height;
+    final large = MediaQuery.textScalerOf(context).scale(16) > 20;
+    final result = [
+      RoundPhase.complete,
+      RoundPhase.retry,
+    ].contains(_game.phase);
+    final label = _mode == PlayMode.zen ? 'Zen' : 'Level ${_game.round.level}';
+    final short = switch (_game.phase) {
+      RoundPhase.preview =>
+        landscape
+            ? '${_game.round.redIds.length}\nred'
+            : large
+            ? '${_game.round.redIds.length} red'
+            : 'Remember ${_game.round.redIds.length} red',
+      RoundPhase.fade => landscape || large ? 'Wait' : 'Keep them in mind',
+      RoundPhase.shuffle =>
+        landscape
+            ? 'Move'
+            : large
+            ? 'Follow'
+            : 'Follow the boxes',
+      RoundPhase.input => landscape || large ? 'Tap' : 'Tap the others',
+      RoundPhase.complete => landscape ? 'Done' : 'Lovely!',
+      RoundPhase.retry =>
+        large || landscape
+            ? (_mode == PlayMode.zen ? 'Look' : 'Retry')
+            : _mode == PlayMode.zen
+            ? 'Another look'
+            : 'Try again',
+      RoundPhase.paused => 'Take a breath',
+    };
+    final progress = _game.phase == RoundPhase.shuffle
+        ? 'Swap ${_game.shuffleStep} / ${_game.round.swaps.length}'
+        : '${_game.selectedCount} / ${_game.round.safeCount}';
+    Widget action({bool iconOnly = false}) {
+      final next = _game.phase == RoundPhase.complete;
+      void run() {
+        if (next) {
+          _nextBoard();
+        } else {
+          _game.retry(preview: _preview, reducedMotion: _reduced);
+        }
+      }
+
+      final text = next
+          ? (_mode == PlayMode.zen ? 'Another board' : 'Next level')
+          : (_mode == PlayMode.zen ? 'Another look' : 'Try again');
+      return iconOnly
+          ? IconButton(
+              key: ValueKey(next ? 'next-level' : 'retry'),
+              tooltip: text,
+              onPressed: run,
+              style: IconButton.styleFrom(
+                backgroundColor: PocketColors.red,
+                foregroundColor: PocketColors.buttonInk,
+              ),
+              icon: Icon(
+                next ? Icons.arrow_forward_rounded : Icons.replay_rounded,
+              ),
+            )
+          : PocketButton(
+              key: ValueKey(next ? 'next-level' : 'retry'),
+              label: text,
+              icon: next ? Icons.arrow_forward_rounded : Icons.replay_rounded,
+              onPressed: run,
+            );
+    }
+
+    return Scaffold(
+      backgroundColor: _mode == PlayMode.zen
+          ? PocketColors.zenBackground
+          : PocketColors.cream,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, bounds) {
+            final header = landscape ? 0.0 : 48.0;
+            final footer = landscape
+                ? 0.0
+                : result
+                ? 64.0
+                : 40.0;
+            final availableWidth = bounds.maxWidth - (landscape ? 76 : 12);
+            final availableHeight = bounds.maxHeight - header - footer - 16;
+            final layout = _game.round.layout;
+            final gap = availableHeight < 450 ? 2.0 : 6.0;
+            final tile = math.min(
+              64.0,
+              math.min(
+                (availableWidth - gap * (layout.columns - 1)) / layout.columns,
+                (availableHeight - gap * (layout.rows - 1) - 6) / layout.rows,
+              ),
+            );
+            final metrics = (
+              layout.columns * tile + (layout.columns - 1) * gap,
+              gap,
+              layout.rows * tile + (layout.rows - 1) * gap,
+            );
+            final board = Center(
+              child: AnimatedBuilder(
+                animation: _glow,
+                builder: (context, _) => _Board(
+                  key: _boardKey,
+                  game: _game,
+                  onTap: _tap,
+                  reducedMotion: _reduced,
+                  symbolCue: widget.settings.symbolCue,
+                  glow: _game.phase == RoundPhase.preview && !_reduced
+                      ? _glow.value
+                      : 0,
+                  metrics: metrics,
+                ),
+              ),
+            );
+            final info = Semantics(
+              liveRegion: true,
+              label: '$label. $title. $progress',
+              child: Text(
+                short,
+                key: const ValueKey('round-instruction'),
+                textAlign: TextAlign.center,
+                style: PocketType.body.copyWith(
+                  fontSize: landscape ? 12 : 14,
+                  fontWeight: FontWeight.w800,
+                  color: _mode == PlayMode.zen
+                      ? PocketColors.zenInk
+                      : PocketColors.ink,
+                ),
+              ),
+            );
+            if (landscape) {
+              return Padding(
+                padding: const EdgeInsets.all(6),
+                child: Row(
+                  children: [
+                    Expanded(child: board),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 56,
+                      child: Column(
+                        children: [
+                          IconButton(
+                            tooltip: 'Pause game',
+                            onPressed: _game.pause,
+                            icon: const Icon(Icons.pause_rounded),
+                          ),
+                          if (!large)
+                            Text(
+                              _mode == PlayMode.zen
+                                  ? 'Zen'
+                                  : '${_game.round.level}',
+                              textAlign: TextAlign.center,
+                              style: PocketType.body.copyWith(fontSize: 12),
+                            ),
+                          Expanded(child: Center(child: info)),
+                          if (result)
+                            action(iconOnly: true)
+                          else
+                            Text(
+                              _game.phase == RoundPhase.shuffle
+                                  ? '${_game.shuffleStep}\n${_game.round.swaps.length}'
+                                  : '${_game.selectedCount}\n${_game.round.safeCount}',
+                              textAlign: TextAlign.center,
+                              style: PocketType.body.copyWith(fontSize: 12),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: header,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          tooltip: 'Return home',
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                        ),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (!large)
+                                Text(
+                                  label.toUpperCase(),
+                                  style: PocketType.body.copyWith(
+                                    fontSize: 11,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              if (_mode == PlayMode.zen && !large)
+                                const SizedBox.shrink(),
+                              Flexible(child: info),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: 'Pause game',
+                          onPressed: _game.pause,
+                          icon: const Icon(Icons.pause_rounded),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(child: board),
+                  SizedBox(
+                    height: footer,
+                    child: result
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                              ),
+                              child: action(iconOnly: large),
+                            ),
+                          )
+                        : Center(
+                            child: Text(
+                              progress,
+                              style: PocketType.body.copyWith(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -438,21 +721,24 @@ class _GamePageState extends State<GamePage>
 
 class _Board extends StatelessWidget {
   const _Board({
+    super.key,
     required this.game,
     required this.onTap,
     required this.reducedMotion,
     required this.symbolCue,
     required this.glow,
+    this.metrics,
   });
   final GameController game;
   final ValueChanged<int> onTap;
   final bool reducedMotion;
   final bool symbolCue;
   final double glow;
+  final (double, double, double)? metrics;
   @override
   Widget build(BuildContext context) {
     final layout = game.round.layout;
-    final (width, gap, height) = _boardMetrics(context, layout);
+    final (width, gap, height) = metrics ?? _boardMetrics(context, layout);
     final (rows, columns) = _boardDimensions(context, layout);
     final transposed = columns != layout.columns || rows != layout.rows;
     final tile = (width - gap * (columns - 1)) / columns;
@@ -467,7 +753,7 @@ class _Board extends StatelessWidget {
           end: 1.0,
         ),
         duration: game.phase == RoundPhase.shuffle && !reducedMotion
-            ? GameController.swapDuration
+            ? game.swapDuration
             : Duration.zero,
         curve: Curves.easeInOutCubic,
         builder: (context, progress, _) {
@@ -547,12 +833,8 @@ class _Board extends StatelessWidget {
   }
 }
 
-(int, int) _boardDimensions(BuildContext context, BoardLayout layout) {
-  final size = MediaQuery.sizeOf(context);
-  return size.width > size.height && layout.rows > layout.columns
-      ? (layout.columns, layout.rows)
-      : (layout.rows, layout.columns);
-}
+(int, int) _boardDimensions(BuildContext context, BoardLayout layout) =>
+    (layout.rows, layout.columns);
 
 (double, double, double) _boardMetrics(
   BuildContext context,

@@ -32,8 +32,8 @@ Future<void> showHowToPlay(BuildContext context) => showModalBottomSheet<void>(
       ),
       const Text(
         'Normal adds more boxes, shorter previews, and visible shuffles. '
-        'Follow the boxes that glowed as they move. Zen keeps the original '
-        'relaxed game, with no shuffles. Tap the lotus beside Settings on Home to play Zen.',
+        'Follow the boxes that glowed as they move. Zen offers random, easy '
+        'shaped boards, with no levels or shuffles. Choose Play Zen below Continue.',
         style: PocketType.body,
       ),
       const SizedBox(height: 18),
@@ -100,9 +100,7 @@ Future<void> showPocketSettings(
   BuildContext context,
   AppSettings settings,
   SoundEffects sounds, {
-  bool allowModeChange = true,
-  bool showModeSetting = true,
-  PlayMode? previewMode,
+  PlayMode previewMode = PlayMode.normal,
 }) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
@@ -111,22 +109,6 @@ Future<void> showPocketSettings(
     builder: (context, _) => PocketSheet(
       title: 'At your pace',
       children: [
-        if (showModeSetting)
-          _SettingSwitch(
-            label: 'Zen mode',
-            detail: !allowModeChange
-                ? 'Return home to change modes'
-                : settings.mode == PlayMode.zen
-                ? 'Just play and relax · no shuffles'
-                : 'Normal grows harder as you go',
-            value: settings.mode == PlayMode.zen,
-            onChanged: allowModeChange
-                ? (value) => settings.update(
-                    mode: value ? PlayMode.zen : PlayMode.normal,
-                  )
-                : null,
-          ),
-        const SizedBox(height: 14),
         _SettingSwitch(
           label: 'Background music',
           detail: 'A quiet companion for your little reset',
@@ -214,7 +196,7 @@ Future<void> showPocketSettings(
         ),
         const SizedBox(height: 14),
         Text(
-          (previewMode ?? settings.mode) == PlayMode.zen
+          previewMode == PlayMode.zen
               ? 'Preview time'
               : 'Preview time · Normal',
           style: TextStyle(
@@ -229,17 +211,13 @@ Future<void> showPocketSettings(
             ButtonSegment(
               value: 3,
               label: Text(
-                (previewMode ?? settings.mode) == PlayMode.zen
-                    ? '3 seconds'
-                    : 'Level timing',
+                previewMode == PlayMode.zen ? '3 seconds' : 'Level timing',
               ),
             ),
             ButtonSegment(
               value: 5,
               label: Text(
-                (previewMode ?? settings.mode) == PlayMode.zen
-                    ? '5 seconds'
-                    : 'Extra time',
+                previewMode == PlayMode.zen ? '5 seconds' : 'Extra time',
               ),
             ),
           ],
