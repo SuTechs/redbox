@@ -12,6 +12,7 @@ import 'package:redbox/core/settings.dart';
 import 'package:redbox/game/round.dart';
 import 'package:redbox/ui/game_page.dart';
 import 'package:redbox/ui/pocket_widgets.dart';
+import 'package:redbox/ui/zen_mark.dart';
 
 import 'capture_screenshots_test.dart' as capture;
 
@@ -31,6 +32,29 @@ void main() {
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+    final markFrame = GlobalKey();
+    await t.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RepaintBoundary(
+            key: markFrame,
+            child: const ZenMark(size: 256),
+          ),
+        ),
+      ),
+    );
+    await t.pump();
+    final markBoundary =
+        markFrame.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    await t.runAsync(() async {
+      final image = await markBoundary.toImage(pixelRatio: 2);
+      final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+      await File('design/zen-mode.png')
+          .writeAsBytes(bytes!.buffer.asUint8List());
+      image.dispose();
+    });
+    await t.pumpWidget(const SizedBox());
     final settings = AppSettings(store: MemorySettingsStore())
       ..haptics = false
       ..reducedMotion = true;

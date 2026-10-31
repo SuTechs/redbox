@@ -111,7 +111,7 @@ void main() {
         t.getRect(find.byKey(const ValueKey('browse-levels'))).top,
         greaterThanOrEqualTo(t.getRect(find.byTooltip('Settings')).bottom),
       );
-      expect(find.text('Play Zen'), findsOneWidget);
+      expect(find.text('Zen mode'), findsOneWidget);
       expect(t.takeException(), isNull);
       await t.pumpWidget(const SizedBox());
       s.dispose();

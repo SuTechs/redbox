@@ -11,6 +11,7 @@ import '../game/round.dart';
 import 'pocket_theme.dart';
 import 'help_and_settings.dart';
 import 'pocket_widgets.dart';
+import 'zen_mark.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({
@@ -181,7 +182,7 @@ class _GamePageState extends State<GamePage>
                   Navigator.pop(sheetContext);
                   _nextBoard();
                 },
-                icon: const Icon(Icons.spa_outlined),
+                icon: const ZenMark(size: 22),
                 label: const Text('New board'),
               ),
             const SizedBox(height: 13),
@@ -331,11 +332,7 @@ class _GamePageState extends State<GamePage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (_mode == PlayMode.zen) ...[
-                  const Icon(
-                    Icons.spa_outlined,
-                    size: 16,
-                    color: PocketColors.zenInk,
-                  ),
+                  const ZenMark(size: 22),
                   const SizedBox(width: 6),
                 ],
                 Flexible(
@@ -615,13 +612,15 @@ class _GamePageState extends State<GamePage>
                             icon: const Icon(Icons.pause_rounded),
                           ),
                           if (!large)
-                            Text(
-                              _mode == PlayMode.zen
-                                  ? 'Zen'
-                                  : '${_game.round.level}',
-                              textAlign: TextAlign.center,
-                              style: PocketType.body.copyWith(fontSize: 12),
-                            ),
+                            _mode == PlayMode.zen
+                                ? const ZenMark(size: 24)
+                                : Text(
+                                    '${_game.round.level}',
+                                    textAlign: TextAlign.center,
+                                    style: PocketType.body.copyWith(
+                                      fontSize: 12,
+                                    ),
+                                  ),
                           Expanded(child: Center(child: info)),
                           if (result)
                             action(iconOnly: true)
@@ -658,15 +657,24 @@ class _GamePageState extends State<GamePage>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               if (!large)
-                                Text(
-                                  label.toUpperCase(),
-                                  style: PocketType.body.copyWith(
-                                    fontSize: 11,
-                                    letterSpacing: 1,
-                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (_mode == PlayMode.zen) ...[
+                                      const ZenMark(size: 18),
+                                      const SizedBox(width: 5),
+                                    ],
+                                    Flexible(
+                                      child: Text(
+                                        label.toUpperCase(),
+                                        style: PocketType.body.copyWith(
+                                          fontSize: 11,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              if (_mode == PlayMode.zen && !large)
-                                const SizedBox.shrink(),
                               Flexible(child: info),
                             ],
                           ),

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <title>Red Box Zen mode</title>
+  <g fill="#E8EBDD" stroke="#506950" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 3C11 7 9.5 11 10.5 15C11.1 18 13.2 20.6 16 22C18.8 20.6 20.9 18 21.5 15C22.5 11 21 7 16 3Z"/>
+    <path d="M5 9C11 9 15 14 16 23C8 23 3.5 18 5 9Z"/>
+    <path d="M27 9C21 9 17 14 16 23C24 23 28.5 18 27 9Z"/>
+    <path d="M2.5 17C9 16.5 14.5 20 16 28C8 28 3.5 24.5 2.5 17Z"/>
+    <path d="M29.5 17C23 16.5 17.5 20 16 28C24 28 28.5 24.5 29.5 17Z"/>
+  </g>
+  <rect x="12.5" y="18" width="7" height="7" rx="1.8" fill="#C6413A"/>
+  <rect x="12.5" y="17" width="7" height="7" rx="1.8" fill="#ED6258"/>
+</svg>

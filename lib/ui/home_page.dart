@@ -12,6 +12,7 @@ import 'help_and_settings.dart';
 import 'levels_page.dart';
 import 'pocket_theme.dart';
 import 'pocket_widgets.dart';
+import 'zen_mark.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -160,8 +161,8 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 12),
             PocketButton(
               key: const ValueKey('play-zen'),
-              label: 'Play Zen',
-              icon: Icons.spa_outlined,
+              label: 'Zen mode',
+              leading: const ZenMark(size: 28),
               secondary: true,
               onPressed: () => _play(context, PlayMode.zen),
             ),

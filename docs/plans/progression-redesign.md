@@ -31,11 +31,11 @@ makes those two ladders easy to confuse.
 1. **Normal is the numbered game.** Continue resumes its unlocked level. Its
    remembered-red count rises through the long-term curve. Replaying a level
    keeps its board and rules; the red positions are fresh.
-2. **Zen has no levels.** Play Zen starts an easy random board. Another board
+2. **Zen has no levels.** Zen mode starts an easy random board. Another board
    starts another. No numbered ladder, unlocked levels, chapter labels or saved
    Zen level is shown. There is no Zen on/off setting.
 3. **Home gives both activities direct entry.** Primary Continue (Let's play on
-   a new install), then a secondary lotus action labelled **Play Zen**. Settings
+   a new install), then a secondary lotus action labelled **Zen mode**. Settings
    stays at the upper right; a small **Levels** icon sits directly beneath it.
    Remove the header's Zen icon and the large Levels button below Continue.
 4. **Levels always means Normal levels.** Return to clear numbered buttons with
@@ -54,7 +54,7 @@ Red Box                                      Settings
                   Pocket toy hero
 
                  Continue · Level N
-                 [lotus] Play Zen
+                 [lotus] Zen mode
                     How to play
 ```
 
@@ -165,7 +165,7 @@ quicker reading. The next memory increase is nineteen reds at 1,500.
 
 ## Zen, without a ladder
 
-- Play Zen starts immediately, with an explicit Zen label and lotus.
+- Zen mode starts immediately, with an explicit Zen label and lotus.
 - Choose a fresh, connected 6–16-box silhouette independently each round. Favor
   6–12 boxes; larger silhouettes are occasional tapping treats, not milestones.
 - One red most of the time; occasionally two on boards of ten or more. Cap at
@@ -187,7 +187,7 @@ quicker reading. The next memory increase is nineteen reds at 1,500.
 | Raising reds, speed and shuffle count at the same milestone creates abrupt difficulty jumps. | Separate red-count and swap-count schedules; movement speed has its own spaced milestones. |
 | The earlier 14-tap cap keeps boards small even at four-digit levels. | Allow boards up to 40 and safe taps up to 23; raise red density rather than filling late boards with easy tapping. |
 | Too many sequential swaps turn the game into waiting. | Limit movement to four pairs, rather than growing it alongside every red-count increase. |
-| Zen with levels and a Settings toggle looks like a second campaign. | A direct Play Zen action, no ladder, random independent boards and no mode setting. |
+| Zen with levels and a Settings toggle looks like a second campaign. | A direct Zen mode action, no ladder, random independent boards and no mode setting. |
 | Shape previews crowd an infrequently visited screen and add UI the player did not request. | Numbered level buttons, state icons and useful chapter copy only. |
 
 ## Critique pass 2 — feasibility and edge cases

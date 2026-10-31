@@ -33,7 +33,7 @@ Future<void> showHowToPlay(BuildContext context) => showModalBottomSheet<void>(
       const Text(
         'Normal adds more boxes, shorter previews, and visible shuffles. '
         'Follow the boxes that glowed as they move. Zen offers random, easy '
-        'shaped boards, with no levels or shuffles. Choose Play Zen below Continue.',
+        'shaped boards, with no levels or shuffles. Choose Zen mode below Continue.',
         style: PocketType.body,
       ),
       const SizedBox(height: 18),

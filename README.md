@@ -36,7 +36,7 @@ Red Box is a warm, tactile memory game with two ways to play: **Normal** builds 
 - **Normal:** a numbered memory challenge, starting with four boxes and one red. Red counts grow to 12 at level 500, 18 at level 1,300 and 20 at level 2,000. Larger boards reach 40 squares. Viewing time follows memory load; visible shuffles begin at 50 and grow to four pairs.
 - **Zen:** random, easy shaped boards with no levels. Enjoy petals, leaves, ribbons, arches and other connected silhouettes—never a plain filled square or rectangle. Remember one red, occasionally two; there are no shuffles or speed increases.
 
-The primary **Continue** action resumes Normal. **Play Zen** sits directly underneath. The **Levels** icon is below Settings and always opens Normal's numbered levels, with no shape previews. Each Normal level keeps its seeded shape while retries choose fresh reds. Zen's **Another board** starts a new random silhouette; **Another look** gently replays a mistaken board.
+The primary **Continue** action resumes Normal. **Zen mode** sits directly underneath. Its custom lotus-and-box mark is available as [SVG](design/zen-mode.svg) and [PNG](design/zen-mode.png). The **Levels** icon is below Settings and always opens Normal's numbered levels, with no shape previews. Each Normal level keeps its seeded shape while retries choose fresh reds. Zen's **Another board** starts a new random silhouette; **Another look** gently replays a mistaken board.
 
 Existing Normal unlocks and audio/comfort preferences survive updates. Old v1/Zen counters are retained only as archived migration data and never promote a casual player into a high Normal level. Reduced motion disables swaps; Extra time extends previews. Neither mode has a countdown while tapping.
 

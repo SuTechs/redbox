@@ -24,7 +24,7 @@ sets and varied seeded layouts. No lives, score, input timer or paywall.
 
 ## Zen
 
-Play Zen starts an independent, random easy board. Zen has no level numbers,
+Zen mode starts an independent, random easy board. Zen has no level numbers,
 chapters, progression, score or Settings toggle. Its curated shuffled shape deck
 contains connected petals, leaves, rings, ribbons, wings, arches and similar
 silhouettes. Solid rectangular and square boards are excluded. Families do not
@@ -38,7 +38,7 @@ available in pause. Random Zen play never changes Normal progress.
 
 ## Navigation and appearance
 
-Home: primary Continue (Let's play for a new player), then Play Zen. Settings is
+Home: primary Continue (Let's play for a new player), then Zen mode. Settings is
 at the top right, with the less prominent Levels icon directly below. The level
 browser is Normal-only: chapter guidance and numbered completed/current/locked
 buttons, with no pattern thumbnails or per-cell red counts. A level picker can

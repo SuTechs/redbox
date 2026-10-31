@@ -59,7 +59,7 @@ Bundle original, quiet WAV cues for taps, continuing, completion, and mistakes. 
 
 ## Normal and Zen
 
-Home keeps Normal's primary Continue action, then a secondary **Play Zen** action
+Home keeps Normal's primary Continue action, then a secondary **Zen mode** action
 with a sage lotus. Settings stays at the upper right; a Levels icon sits directly
 below it. There is no header Zen shortcut, mode selector or Zen Settings toggle.
 Levels is a Normal-only numbered browser without shape previews or per-cell
@@ -88,3 +88,14 @@ identities in the new fitted variant. Reduced motion disables shuffles.
 
 Maintain separate Normal progression and temporary Zen sessions. Keep saved
 Normal unlocks and comfort preferences; old Zen counters are inert migration data.
+
+
+## Zen mode mark
+
+Use the custom five-petal sage lotus sheltering a coral square, with rounded
+strokes and a tiny tile underside. The Home action is labelled **Zen mode** and
+places this 28px mark before the label. Reuse it in Zen's mode badge, compact
+header and New board pause action. Keep it decorative beside an accessible text
+label; do not add duplicate screen-reader announcements. Flutter draws the mark
+as vector paths, without an icon-font or raster dependency. The matching SVG
+source and PNG export live at `design/zen-mode.svg` and `design/zen-mode.png`.

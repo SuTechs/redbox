@@ -76,11 +76,13 @@ class PocketButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.leading,
     this.secondary = false,
   });
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final Widget? leading;
   final bool secondary;
   @override
   State<PocketButton> createState() => _PocketButtonState();
@@ -144,6 +146,10 @@ class _PocketButtonState extends State<PocketButton> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    if (widget.leading != null) ...[
+                      widget.leading!,
+                      const SizedBox(width: 10),
+                    ],
                     Flexible(
                       child: Text(widget.label, textAlign: TextAlign.center),
                     ),
