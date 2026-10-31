@@ -55,6 +55,7 @@ class _LevelsPageState extends State<LevelsPage> {
           sounds: widget.sounds,
           generator: widget.generator,
           initialLevel: level,
+          mode: PlayMode.normal,
         ),
       ),
     );
@@ -129,7 +130,11 @@ class _LevelsPageState extends State<LevelsPage> {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: widget.settings,
     builder: (context, _) {
-      final pace = LevelPace.forLevel(_firstLevel);
+      final featuredLevel = widget.settings.level.clamp(
+        _firstLevel,
+        _lastLevel,
+      );
+      final difficulty = NormalDifficulty.forLevel(featuredLevel);
       final currentChapter = (widget.settings.level - 1) ~/ _chapterSize;
       return Scaffold(
         body: SafeArea(
@@ -147,7 +152,7 @@ class _LevelsPageState extends State<LevelsPage> {
                           onPressed: () => Navigator.pop(context),
                           icon: const Icon(Icons.arrow_back_rounded),
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'LEVELS',
                             textAlign: TextAlign.center,
@@ -196,8 +201,8 @@ class _LevelsPageState extends State<LevelsPage> {
                                               ),
                                             ),
                                             const SizedBox(height: 8),
-                                            const Text(
-                                              'Revisit a favorite.\nTake your time.',
+                                            Text(
+                                              'Build your memory.\nOne little win at a time.',
                                               style: PocketType.body,
                                             ),
                                           ],
@@ -243,43 +248,27 @@ class _LevelsPageState extends State<LevelsPage> {
                                                 ),
                                               ),
                                             ),
-                                            _PaceBadge(pace: pace),
+                                            const Icon(
+                                              Icons.auto_awesome_rounded,
+                                              size: 18,
+                                              color: PocketColors.redDepth,
+                                            ),
                                           ],
                                         ),
                                         const SizedBox(height: 12),
                                         Text(
-                                          pace.title,
+                                          difficulty.label,
                                           style: PocketType.title.copyWith(
                                             fontSize: 25,
                                           ),
                                         ),
                                         const SizedBox(height: 5),
                                         Text(
-                                          pace.description,
+                                          difficulty.chapterHint,
                                           style: PocketType.body.copyWith(
                                             fontSize: 13,
                                           ),
                                         ),
-                                        if (_firstLevel > 50) ...[
-                                          const SizedBox(height: 12),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.spa_outlined,
-                                                size: 15,
-                                                color: PocketColors.redDepth,
-                                              ),
-                                              const SizedBox(width: 7),
-                                              Flexible(
-                                                child: Text(
-                                                  'Easy moments every 5 levels',
-                                                  style: PocketType.body
-                                                      .copyWith(fontSize: 12),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
                                       ],
                                     ),
                                   ),
@@ -417,7 +406,7 @@ class _LevelsPageState extends State<LevelsPage> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'No finish line. No hurry.',
+                          'Every little win is yours to revisit.',
                           style: PocketType.body.copyWith(fontSize: 12),
                         ),
                       ],
@@ -439,28 +428,6 @@ class _LevelsPageState extends State<LevelsPage> {
   }
 }
 
-class _PaceBadge extends StatelessWidget {
-  const _PaceBadge({required this.pace});
-  final LevelPace pace;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      color: PocketColors.cream,
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Text(
-      pace.label,
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w800,
-        color: PocketColors.ink,
-      ),
-    ),
-  );
-}
-
 class _LevelTile extends StatelessWidget {
   const _LevelTile({
     required this.level,
@@ -477,14 +444,13 @@ class _LevelTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locked = onTap == null;
-    final breather = isBreatherLevel(level);
     return Semantics(
       label:
           'Level $level, ${current
               ? 'ready to play'
               : completed
               ? 'completed, replay'
-              : 'locked'}${breather ? ', easy moment' : ''}',
+              : 'locked'}',
       button: true,
       enabled: !locked,
       onTap: onTap,
@@ -521,17 +487,14 @@ class _LevelTile extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(9),
                       child: FittedBox(
-                        fit: BoxFit.scaleDown,
                         child: Text(
                           '$level',
-                          style: TextStyle(
-                            fontFamily: 'Fredoka',
+                          style: PocketType.title.copyWith(
                             fontSize: 22,
-                            fontWeight: FontWeight.w500,
                             color: current
                                 ? PocketColors.buttonInk
                                 : PocketColors.ink.withValues(
-                                    alpha: locked ? .45 : 1,
+                                    alpha: locked ? .5 : 1,
                                   ),
                           ),
                         ),
@@ -550,18 +513,6 @@ class _LevelTile extends StatelessWidget {
                         color: completed
                             ? PocketColors.redDepth
                             : PocketColors.muted.withValues(alpha: .6),
-                      ),
-                    ),
-                  if (breather)
-                    Positioned(
-                      left: 5,
-                      top: 5,
-                      child: Icon(
-                        Icons.spa_outlined,
-                        size: 11,
-                        color: current
-                            ? PocketColors.buttonInk
-                            : PocketColors.redDepth,
                       ),
                     ),
                 ],

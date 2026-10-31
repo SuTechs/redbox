@@ -51,12 +51,51 @@ Levels: “Little steps” beside a small square mascot, a tactile chapter card 
 
 Game: back action, level number, pause action, “Watch the red box(es)” then “Tap the others”, centered board, small progress dots and count, and “A little focus. No hurry.” Success and retry replace the instruction and footer while keeping the board visible.
 
-Tutorial, settings, and pause use cream bottom sheets with rounded upper corners and the same typography. Settings include sound, haptics, 3/5-second preview, reduced motion, and a symbol cue for players who need a cue beyond color.
+Tutorial, settings, and pause use cream bottom sheets with rounded upper corners and the same typography. Settings include sound, haptics, Zen's 3/5-second preview or Normal's Extra time option, reduced motion, and a symbol cue for players who need a cue beyond color.
 
 ## Sound
 
 Bundle original, quiet WAV cues for taps, continuing, completion, and mistakes. Background music offers two original 64-second looping compositions: Cloud drift (slow ambient chords) and Warm keys (sparse soft notes). Keep music quieter than taps, fade starts and changes, and pause it in the background. Separate music and tap-sound switches, a track picker, and Mute all audio are available in settings. Music & sound is also accessible from the game's pause sheet. Haptics can be disabled separately.
 
-## Gameplay commitments
+## Normal and Zen
 
-Fresh rounds randomize red positions, including level 1. Retry regenerates the red set; recent same-level repetitions are avoided. Pause/resume keeps the current pattern. Levels never wrap back to 1. Shapes with 6–16 boxes vary from the beginning; the first 50 levels stay easy by previewing just one red box. Later levels mix one, two, and three red boxes. Easy moments keep the varied silhouette and reduce memory load. Tapping remains the main pleasure. Pattern families are connected, with seeded rotations/reflections, alternating sizes, and no consecutive family repeats. Fit both tall and wide patterns to the screen while retaining 48-pixel touch targets. Pace labels stay friendly: Easy, Gentle, Steady, Playful, Curious, Endless. Do not determine correctness from the current tile color.
+Home keeps Normal's primary Continue action, then a secondary **Zen mode** action
+with a sage lotus. Settings stays at the upper right; a Levels icon sits directly
+below it. There is no header Zen shortcut, mode selector or Zen Settings toggle.
+Levels is a Normal-only numbered browser without shape previews or per-cell
+red counts. Use useful chapter skill summaries and clear completed/current/locked
+states. Both Home play actions stay visible on a 320×568 phone at default text.
+
+Zen has no level counter. It uses the warm cream background, sage accents
+(`#E8EBDD`) and dark sage ink (`#506950`), with a visible Zen/lotus identity. Its
+shuffled deck excludes all solid rectangles and squares: choose shaped petals,
+leaves, rings, ribbons, arches and wings. Avoid consecutive family repeats.
+Completion says Another board; mistakes offer Another look, replaying that board.
+
+Normal uses the [approved curve](docs/plans/progression-redesign.md). The red
+count rises to eighteen on forty-box boards at 1,300. The shape and timing are
+stable per level; retry changes reds and movement plans. Small, spaced movement
+milestones follow memory growth. Opposite arcs and shared edge corrections keep
+both moving tiles visible. Draw moving boxes above stationary tiles; lock input
+until their movement and settling gap end.
+
+Regular phones retain the spacious layout. Dense, short, landscape and large-text
+screens use board-first controls, with a side rail in landscape. Fit variants
+within six columns/eight rows in portrait or nine columns/five rows in landscape.
+All active tiles are square, at least 48px, and fully visible; never put part of a
+timed board out of view. Reserve tile-depth space. Rotation replays remembered
+identities in the new fitted variant. Reduced motion disables shuffles.
+
+Maintain separate Normal progression and temporary Zen sessions. Keep saved
+Normal unlocks and comfort preferences; old Zen counters are inert migration data.
+
+
+## Zen mode mark
+
+Use the custom five-petal sage lotus sheltering a coral square, with rounded
+strokes and a tiny tile underside. The Home action is labelled **Zen mode** and
+places this 28px mark before the label. Reuse it in Zen's mode badge, compact
+header and New board pause action. Keep it decorative beside an accessible text
+label; do not add duplicate screen-reader announcements. Flutter draws the mark
+as vector paths, without an icon-font or raster dependency. The matching SVG
+source and PNG export live at `design/zen-mode.svg` and `design/zen-mode.png`.

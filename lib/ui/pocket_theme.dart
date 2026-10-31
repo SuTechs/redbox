@@ -9,6 +9,9 @@ abstract final class PocketColors {
   static const tile = Color(0xFFF0E6D6);
   static const tileDepth = Color(0xFFDDCEBA);
   static const buttonInk = Color(0xFFFFFAF4);
+  static const zenBackground = cream;
+  static const zenSurface = Color(0xFFE8EBDD);
+  static const zenInk = Color(0xFF506950);
 }
 
 abstract final class PocketType {

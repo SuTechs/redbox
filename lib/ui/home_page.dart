@@ -12,6 +12,7 @@ import 'help_and_settings.dart';
 import 'levels_page.dart';
 import 'pocket_theme.dart';
 import 'pocket_widgets.dart';
+import 'zen_mark.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
@@ -23,111 +24,163 @@ class HomePage extends StatelessWidget {
   final AppSettings settings;
   final SoundEffects sounds;
   final RoundGenerator generator;
+  void _play(BuildContext context, PlayMode mode) {
+    unawaited(MusicScope.of(context).activate());
+    unawaited(sounds.play(GameCue.continueRound));
+    if (settings.haptics) unawaited(HapticFeedback.selectionClick());
+    Navigator.push(
+      context,
+      pocketRoute<void>(
+        context,
+        GamePage(
+          settings: settings,
+          sounds: sounds,
+          generator: generator,
+          mode: mode,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: settings,
-    builder: (context, _) => PocketPage(
-      minimumHeight: 626,
-      child: Column(
+    builder: (context, _) {
+      final compact =
+          MediaQuery.sizeOf(context).height -
+              MediaQuery.paddingOf(context).vertical <
+          700;
+      final large = MediaQuery.textScalerOf(context).scale(16) > 20;
+      final heading = Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const PocketWordmark(),
-              IconButton(
-                tooltip: 'Settings',
-                onPressed: () => showPocketSettings(context, settings, sounds),
-                icon: const Icon(Icons.tune_rounded),
-              ),
-            ],
-          ),
-          const Spacer(),
-          const HomeIllustration(),
-          const SizedBox(height: 20),
           const Text(
             'Red Box',
             style: TextStyle(
               fontFamily: 'Fredoka',
-              fontSize: 48,
+              fontSize: 44,
               fontWeight: FontWeight.w500,
               color: PocketColors.ink,
               letterSpacing: -2,
               height: 1.05,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
-            'A tiny game. A little reset.\nTake it one box at a time.',
+            'A tiny game. A little reset.',
             textAlign: TextAlign.center,
             style: PocketType.body.copyWith(
-              fontSize: 16,
+              fontSize: compact ? 14 : 16,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const Spacer(flex: 2),
-          if (settings.level > 1) ...[
-            Text(
-              'Your next little win · Level ${settings.level}',
-              style: PocketType.body.copyWith(fontSize: 13),
-            ),
-            const SizedBox(height: 13),
-          ],
-          PocketButton(
-            key: const ValueKey('play'),
-            label: settings.level > 1 ? 'Continue' : "Let's play",
-            icon: Icons.arrow_forward_rounded,
-            onPressed: () {
-              unawaited(MusicScope.of(context).activate());
-              unawaited(sounds.play(GameCue.continueRound));
-              if (settings.haptics) unawaited(HapticFeedback.selectionClick());
-              Navigator.push(
-                context,
-                pocketRoute<void>(
-                  context,
-                  GamePage(
-                    settings: settings,
-                    sounds: sounds,
-                    generator: generator,
+        ],
+      );
+      return PocketPage(
+        minimumHeight: compact ? 480 : 680,
+        fillHeight: !large,
+        child: Column(
+          children: [
+            SizedBox(
+              height: 100,
+              child: Stack(
+                children: [
+                  const Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 15),
+                      child: PocketWordmark(),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 14),
-          PocketButton(
-            key: const ValueKey('browse-levels'),
-            label: 'Little steps · Levels',
-            icon: Icons.grid_view_rounded,
-            secondary: true,
-            onPressed: () {
-              unawaited(MusicScope.of(context).activate());
-              Navigator.push(
-                context,
-                pocketRoute<void>(
-                  context,
-                  LevelsPage(
-                    settings: settings,
-                    sounds: sounds,
-                    generator: generator,
+                  Align(
+                    alignment: Alignment.topRight,
+                    child: Column(
+                      children: [
+                        IconButton(
+                          tooltip: 'Settings',
+                          onPressed: () =>
+                              showPocketSettings(context, settings, sounds),
+                          icon: const Icon(Icons.tune_rounded),
+                        ),
+                        IconButton(
+                          key: const ValueKey('browse-levels'),
+                          tooltip: 'Levels',
+                          onPressed: () {
+                            unawaited(MusicScope.of(context).activate());
+                            Navigator.push(
+                              context,
+                              pocketRoute<void>(
+                                context,
+                                LevelsPage(
+                                  settings: settings,
+                                  sounds: sounds,
+                                  generator: generator,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.grid_view_rounded),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => showHowToPlay(context),
-            child: const Text(
-              'How to play',
-              style: TextStyle(
-                color: PocketColors.muted,
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+                ],
               ),
             ),
-          ),
-        ],
-      ),
-    ),
+            if (!large) const Spacer(),
+            if (compact && !large)
+              Row(
+                children: [
+                  const SizedBox(
+                    width: 78,
+                    child: HomeIllustration(height: 88),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(child: heading),
+                ],
+              )
+            else ...[
+              const HomeIllustration(height: 180),
+              const SizedBox(height: 18),
+              heading,
+            ],
+            if (!large) const Spacer(flex: 2) else const SizedBox(height: 28),
+            if (settings.level > 1) ...[
+              Text(
+                'Your next little win · Level ${settings.level}',
+                style: PocketType.body.copyWith(fontSize: 13),
+              ),
+              const SizedBox(height: 10),
+            ],
+            PocketButton(
+              key: const ValueKey('play'),
+              label: settings.level > 1 ? 'Continue' : "Let's play",
+              icon: Icons.arrow_forward_rounded,
+              onPressed: () => _play(context, PlayMode.normal),
+            ),
+            const SizedBox(height: 12),
+            PocketButton(
+              key: const ValueKey('play-zen'),
+              label: 'Zen mode',
+              leading: const ZenMark(size: 28),
+              secondary: true,
+              onPressed: () => _play(context, PlayMode.zen),
+            ),
+            const SizedBox(height: 6),
+            TextButton(
+              onPressed: () => showHowToPlay(context),
+              child: const Text(
+                'How to play',
+                style: TextStyle(
+                  color: PocketColors.muted,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
   );
 }

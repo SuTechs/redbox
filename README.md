@@ -18,7 +18,7 @@
 
 ## A moment for you
 
-Red Box is a warm, tactile memory game for a gentle break. A few boxes glow red, then fade. Remember them and tap every other box. Each correct tap turns red too, so the board becomes a small, satisfying puzzle. There is no countdown while tapping and no penalty for trying again.
+Red Box is a warm, tactile memory game with two ways to play: **Normal** builds into a memory challenge, and **Zen** keeps the original gentle break. A few boxes glow red, then fade. Remember them and tap every other box. In Normal, later levels visibly shuffle some boxes before you tap, so follow the boxes that glowed. Each correct tap turns red too, so the board becomes a small, satisfying puzzle. There is no countdown while tapping and no penalty for trying again.
 
 <p align="center">
   <img src="store/google-play/screenshots/01-a-little-reset.png" width="30%" alt="A tiny game. A little reset.">
@@ -31,10 +31,21 @@ Red Box is a warm, tactile memory game for a gentle break. A few boxes glow red,
   <img src="store/google-play/screenshots/06-one-more-smile.png" width="30%" alt="One more box. One more smile.">
 </p>
 
+## Two ways to play
+
+- **Normal:** a numbered memory challenge, starting with four boxes and one red. Red counts grow to 12 at level 500, 18 at level 1,300 and 20 at level 2,000. Larger boards reach 40 squares. Viewing time follows memory load; visible shuffles begin at 50 and grow to four pairs.
+- **Zen:** random, easy shaped boards with no levels. Enjoy petals, leaves, ribbons, arches and other connected silhouettes—never a plain filled square or rectangle. Remember one red, occasionally two; there are no shuffles or speed increases.
+
+The primary **Continue** action resumes Normal. **Zen mode** sits directly underneath. Its custom lotus-and-box mark is available as [SVG](design/zen-mode.svg) and [PNG](design/zen-mode.png). The **Levels** icon is below Settings and always opens Normal's numbered levels, with no shape previews. Each Normal level keeps its seeded shape while retries choose fresh reds. Zen's **Another board** starts a new random silhouette; **Another look** gently replays a mistaken board.
+
+Existing Normal unlocks and audio/comfort preferences survive updates. Old v1/Zen counters are retained only as archived migration data and never promote a casual player into a high Normal level. Reduced motion disables swaps; Extra time extends previews. Neither mode has a countdown while tapping.
+
+The [approved progression plan](docs/plans/progression-redesign.md) includes the full curve, design critiques and responsive constraints. Real Flutter captures show [level 1](docs/difficulty/normal-1.png), [level 500](docs/difficulty/normal-500.png), [level 1,300](docs/difficulty/normal-1300.png), [Zen](docs/difficulty/05-zen-preview.png), and the [level browser](docs/difficulty/08-level-shapes.png). Regenerate milestones and Zen examples with `flutter test tools/capture_progression_test.dart`. For the timed shuffle GIF, run `flutter test tools/capture_difficulty_test.dart` then `python3 tools/render_difficulty_gif.py` (Pillow required).
+
 ## The little things
 
-- **Endless, varied shapes.** Seeded silhouettes use 6–16 square boxes; the opening boards have 6, 8, 10, 12, and 9. A gentle curve begins with one red box and gradually mixes one to three.
-- **Fresh memories.** Retries and replays choose new red positions. Pause and resume preserve the round.
+- **Beautiful Zen shapes.** A shuffled deck of named, non-rectangular silhouettes uses 6–16 square boxes, with no consecutive shape-family repeats or difficulty ladder.
+- **Fresh memories.** Normal retries and replays choose new red positions; Zen’s Another look replays the same easy board. Pause and resume preserve the round.
 - **Little steps.** Browse unlocked levels, replay a favorite, or jump to a previous level without losing your progress.
 - **Your own quiet soundtrack.** Two original ambient loops, Cloud drift and Warm keys, gentle tap sounds, separate audio switches, and one action to mute everything.
 - **Comfort controls.** Longer previews, reduced motion, optional haptics, and a symbol cue for red boxes.
@@ -59,7 +70,7 @@ flutter build ios --simulator --debug
 flutter build web --release --no-web-resources-cdn --no-wasm-dry-run
 ```
 
-The tests cover reproducible connected shapes, variety, red-position randomness, full rounds, retry, pause/resume, progress, audio, and fully visible square touch targets on small screens.
+The tests cover connected seeded shapes in both modes, red-position randomness, tracked shuffles, full rounds, retry, pause/resume, reduced motion, progress migration, independent mode progress, audio, and square 48px touch targets on small and large-text screens.
 
 ## Patterns and design
 
@@ -79,7 +90,7 @@ The approved Pocket toy guide is saved in [design/pocket-toy.html](design/pocket
 
 Find Red Box on [Google Play](https://play.google.com/store/apps/details?id=com.sutechs.redbox), [App Store](https://apps.apple.com/app/id6818607149), or [play online](https://sutechs.github.io/redbox/). Visit [sutechs.com/redbox](https://sutechs.com/redbox) for a little look inside.
 
-[RELEASING.md](RELEASING.md) covers signing, store assets, GitHub Pages, and remaining account steps. Android release builds require a real upload key and fail clearly when signing configuration is missing. Credentials, keystores, and local release files are ignored by Git.
+[CHANGELOG.md](CHANGELOG.md) lists the latest changes. [RELEASING.md](RELEASING.md) covers signing, store assets, GitHub Pages, and release checks for Normal and Zen. Android release builds require a real upload key and fail clearly when signing configuration is missing. Credentials, keystores, and local release files are ignored by Git.
 
 Every push to `main` runs format, analysis, and tests, then builds and deploys the game to GitHub Pages. Pull requests run the checks without deploying. The separate Android workflow can build a signed App Bundle when release secrets are configured; it does not automatically submit to Google Play.
 

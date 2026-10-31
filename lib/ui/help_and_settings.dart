@@ -30,7 +30,13 @@ Future<void> showHowToPlay(BuildContext context) => showModalBottomSheet<void>(
         title: 'Tap the others',
         detail: 'Correct taps turn red too. Leave the remembered boxes alone.',
       ),
-      const SizedBox(height: 10),
+      const Text(
+        'Normal adds more boxes, shorter previews, and visible shuffles. '
+        'Follow the boxes that glowed as they move. Zen offers random, easy '
+        'shaped boards, with no levels or shuffles. Choose Zen mode below Continue.',
+        style: PocketType.body,
+      ),
+      const SizedBox(height: 18),
       PocketButton(label: 'Got it', onPressed: () => Navigator.pop(context)),
     ],
   ),
@@ -93,8 +99,9 @@ class _HelpStep extends StatelessWidget {
 Future<void> showPocketSettings(
   BuildContext context,
   AppSettings settings,
-  SoundEffects sounds,
-) => showModalBottomSheet<void>(
+  SoundEffects sounds, {
+  PlayMode previewMode = PlayMode.normal,
+}) => showModalBottomSheet<void>(
   context: context,
   isScrollControlled: true,
   builder: (context) => ListenableBuilder(
@@ -188,8 +195,10 @@ Future<void> showPocketSettings(
           onChanged: (value) => settings.update(haptics: value),
         ),
         const SizedBox(height: 14),
-        const Text(
-          'Preview time',
+        Text(
+          previewMode == PlayMode.zen
+              ? 'Preview time'
+              : 'Preview time · Normal',
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w800,
@@ -198,9 +207,19 @@ Future<void> showPocketSettings(
         ),
         const SizedBox(height: 10),
         SegmentedButton<int>(
-          segments: const [
-            ButtonSegment(value: 3, label: Text('3 seconds')),
-            ButtonSegment(value: 5, label: Text('5 seconds')),
+          segments: [
+            ButtonSegment(
+              value: 3,
+              label: Text(
+                previewMode == PlayMode.zen ? '3 seconds' : 'Level timing',
+              ),
+            ),
+            ButtonSegment(
+              value: 5,
+              label: Text(
+                previewMode == PlayMode.zen ? '5 seconds' : 'Extra time',
+              ),
+            ),
           ],
           selected: {settings.previewSeconds},
           onSelectionChanged: (value) =>
@@ -220,7 +239,7 @@ Future<void> showPocketSettings(
         const SizedBox(height: 14),
         _SettingSwitch(
           label: 'Reduced motion',
-          detail: 'Hold the red color without a glow',
+          detail: 'Hold red without a glow · no shuffles',
           value: settings.reducedMotion,
           onChanged: (value) => settings.update(reducedMotion: value),
         ),
@@ -290,7 +309,7 @@ Future<void> showPrivacyAndAbout(
         onPressed: () => showLicensePage(
           context: context,
           applicationName: 'Red Box',
-          applicationVersion: '1.0.0',
+          applicationVersion: '1.1.0',
           applicationLegalese: '© 2026 SuTechs',
         ),
         child: const Text('Open-source licenses'),
@@ -311,7 +330,7 @@ class _SettingSwitch extends StatelessWidget {
   final String label;
   final String detail;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
   @override
   Widget build(BuildContext context) => SwitchListTile.adaptive(
     contentPadding: EdgeInsets.zero,

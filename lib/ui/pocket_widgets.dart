@@ -22,31 +22,46 @@ class PocketPage extends StatelessWidget {
     super.key,
     required this.child,
     required this.minimumHeight,
+    this.fillHeight = true,
+    this.backgroundColor,
   });
   final Widget child;
   final double minimumHeight;
+  final bool fillHeight;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: math.max(constraints.maxHeight, minimumHeight),
-                  ),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 16, 24, 25),
-                      child: child,
+              builder: (context, constraints) => !fillHeight
+                  ? SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 25),
+                        child: child,
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: math.max(
+                            constraints.maxHeight,
+                            minimumHeight,
+                          ),
+                        ),
+                        child: IntrinsicHeight(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 16, 24, 25),
+                            child: child,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ),
         ),
@@ -61,11 +76,13 @@ class PocketButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.leading,
     this.secondary = false,
   });
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final Widget? leading;
   final bool secondary;
   @override
   State<PocketButton> createState() => _PocketButtonState();
@@ -129,6 +146,10 @@ class _PocketButtonState extends State<PocketButton> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    if (widget.leading != null) ...[
+                      widget.leading!,
+                      const SizedBox(width: 10),
+                    ],
                     Flexible(
                       child: Text(widget.label, textAlign: TextAlign.center),
                     ),
@@ -165,13 +186,15 @@ class PocketWordmark extends StatelessWidget {
         ),
       ),
       const SizedBox(width: 8),
-      const Text(
-        'Red Box',
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w800,
-          color: PocketColors.ink,
-          letterSpacing: -.4,
+      const Flexible(
+        child: Text(
+          'Red Box',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            color: PocketColors.ink,
+            letterSpacing: -.4,
+          ),
         ),
       ),
     ],
@@ -249,31 +272,41 @@ class _MascotFace extends CustomPainter {
 }
 
 class HomeIllustration extends StatelessWidget {
-  const HomeIllustration({super.key});
+  const HomeIllustration({super.key, this.height = 217});
+  final double height;
   @override
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
-    height: 217,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        const SquareMascot(),
-        Positioned(
-          left: 27,
-          top: 38,
-          child: _FloatingSquare(size: 28, angle: .25),
-        ),
-        Positioned(
-          right: 16,
-          bottom: 32,
-          child: _FloatingSquare(size: 38, angle: -.24),
-        ),
-        Positioned(
-          left: 56,
-          bottom: 20,
-          child: _FloatingSquare(size: 17, angle: -.12),
-        ),
-      ],
+    height: height,
+    child: LayoutBuilder(
+      builder: (context, bounds) {
+        if (bounds.maxWidth < 180 || height < 140) {
+          return Center(
+            child: SquareMascot(size: math.min(bounds.maxWidth, height) * .72),
+          );
+        }
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            const SquareMascot(),
+            const Positioned(
+              left: 27,
+              top: 38,
+              child: _FloatingSquare(size: 28, angle: .25),
+            ),
+            const Positioned(
+              right: 16,
+              bottom: 32,
+              child: _FloatingSquare(size: 38, angle: -.24),
+            ),
+            const Positioned(
+              left: 56,
+              bottom: 20,
+              child: _FloatingSquare(size: 17, angle: -.12),
+            ),
+          ],
+        );
+      },
     ),
   );
 }
