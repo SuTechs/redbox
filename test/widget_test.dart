@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:redbox/core/settings.dart';
 import 'package:redbox/core/music.dart';
@@ -726,4 +727,31 @@ void main() {
       },
     );
   }
+  testWidgets('Small-phone Home keeps the primary play action visible', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(top: 20);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPadding);
+    for (final family in ['Fredoka', 'Nunito']) {
+      await (FontLoader(
+        family,
+      )..addFont(rootBundle.load('assets/fonts/$family.ttf'))).load();
+    }
+    for (final mode in PlayMode.values) {
+      final (settings, _) = await mount(tester, mode: mode, level: 7);
+      final action = tester.getRect(find.byKey(const ValueKey('play')));
+      expect(action.top, greaterThanOrEqualTo(20));
+      expect(
+        action.bottom,
+        lessThanOrEqualTo(568),
+        reason: '${mode.label}: play must be visible without scrolling',
+      );
+      await tester.pumpWidget(const SizedBox());
+      settings.dispose();
+    }
+  });
 }

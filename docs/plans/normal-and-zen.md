@@ -86,10 +86,11 @@ between players.
 
 ## Verification results — 31 October 2026
 
-- All 68 Flutter tests pass, including legacy Zen regressions and Normal mode,
+- All 69 Flutter tests pass, including legacy Zen regressions and Normal mode,
   migration, shuffled identities, mid-shuffle reduced motion, rotation,
   320×568 previews with safe-area padding, 568×320 landscape, and system text
-  scales 1.2, 1.4, 1.8 and 2.0.
+  scales 1.2, 1.4, 1.8 and 2.0. Real-font small-phone tests also verify that
+  the Home play action is visible without scrolling in either mode.
 - Formatter is clean and `flutter analyze` reports no issues.
 - Release web build, signed Android App Bundle, and iOS simulator debug build pass.
 - Real Flutter PNGs and timed shuffle frames were exported with the capture test.

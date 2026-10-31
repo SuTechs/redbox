@@ -112,6 +112,18 @@ void main() {
     await tester.pumpAndSettle();
     await save('docs/difficulty/06-zen-settings.png');
     await tester.pumpWidget(const SizedBox());
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.padding = const FakeViewPadding(top: 20);
+    addTearDown(tester.view.resetPadding);
+    settings.update(mode: PlayMode.normal);
+    await mount();
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(find.byKey(const ValueKey('play'))).bottom,
+      lessThanOrEqualTo(568),
+    );
+    await save('docs/difficulty/07-compact-home.png');
+    await tester.pumpWidget(const SizedBox());
     await settings.saved;
     settings.dispose();
   });

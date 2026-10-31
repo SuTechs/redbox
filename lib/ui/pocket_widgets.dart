@@ -263,11 +263,12 @@ class _MascotFace extends CustomPainter {
 }
 
 class HomeIllustration extends StatelessWidget {
-  const HomeIllustration({super.key});
+  const HomeIllustration({super.key, this.height = 217});
+  final double height;
   @override
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
-    height: 217,
+    height: height,
     child: Stack(
       alignment: Alignment.center,
       children: [
