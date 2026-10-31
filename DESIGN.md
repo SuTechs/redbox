@@ -51,7 +51,7 @@ Levels: “Little steps” beside a small square mascot, a tactile chapter card 
 
 Game: back action, level number, pause action, “Watch the red box(es)” then “Tap the others”, centered board, small progress dots and count, and “A little focus. No hurry.” Success and retry replace the instruction and footer while keeping the board visible.
 
-Tutorial, settings, and pause use cream bottom sheets with rounded upper corners and the same typography. Settings include sound, haptics, 3/5-second preview, reduced motion, and a symbol cue for players who need a cue beyond color.
+Tutorial, settings, and pause use cream bottom sheets with rounded upper corners and the same typography. Settings include sound, haptics, Zen's 3/5-second preview or Normal's Extra time option, reduced motion, and a symbol cue for players who need a cue beyond color.
 
 ## Sound
 
@@ -59,9 +59,9 @@ Bundle original, quiet WAV cues for taps, continuing, completion, and mistakes. 
 
 ## Normal and Zen
 
-Preserve the same cream/coral Pocket toy style in both modes. Home has a tactile Normal / Zen segmented control; Settings has a Zen mode switch. Show the active mode on Levels and Game. Zen keeps the original gameplay below. Normal adds larger silhouettes (at most five columns), more remembered boxes, shorter previews, and visible pair swaps from level 10. See [the difficulty plan](docs/plans/normal-and-zen.md).
+Preserve the same cream/coral Pocket toy style in both modes. Home has a tactile Normal / Zen segmented control; Settings has a Zen mode switch. Show the active mode on Levels and Game. Zen keeps the original gameplay below. Normal adds larger silhouettes (at most five columns in portrait), more remembered boxes, shorter previews, and visible pair swaps from level 10. See [the difficulty plan](docs/plans/normal-and-zen.md).
 
-For shuffles, fade all red cues first, lock taps, then move one remembered/safe pair at a time along opposite arcs. Each swap moves for 650ms with a 180ms settling gap. Draw moving boxes above stationary boxes. Keep 48px square targets; allow vertical scrolling for larger boards on short phones and wrap progress dots. Reduced motion disables shuffling rather than concealing an instantaneous rearrangement.
+For shuffles, fade all red cues first, lock taps, then move one remembered/safe pair at a time along opposite arcs. Each swap moves for 650ms with a 180ms settling gap. Draw moving boxes above stationary boxes. Keep 48px square targets; allow vertical scrolling for larger boards on short phones and wrap progress dots. Tall boards transpose in landscape, and rotating during an active round replays the same preview. Reduced motion disables shuffling rather than concealing an instantaneous rearrangement.
 
 Progress and current level are separate per mode. Old progress belongs to Zen. Mode changes happen from Home or Levels; the pause sheet keeps the current round's mode fixed. Extra time works in Normal too.
 

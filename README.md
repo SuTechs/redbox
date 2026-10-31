@@ -88,7 +88,7 @@ The approved Pocket toy guide is saved in [design/pocket-toy.html](design/pocket
 
 Find Red Box on [Google Play](https://play.google.com/store/apps/details?id=com.sutechs.redbox), [App Store](https://apps.apple.com/app/id6818607149), or [play online](https://sutechs.github.io/redbox/). Visit [sutechs.com/redbox](https://sutechs.com/redbox) for a little look inside.
 
-[RELEASING.md](RELEASING.md) covers signing, store assets, GitHub Pages, and remaining account steps. Android release builds require a real upload key and fail clearly when signing configuration is missing. Credentials, keystores, and local release files are ignored by Git.
+[CHANGELOG.md](CHANGELOG.md) lists the latest changes. [RELEASING.md](RELEASING.md) covers signing, store assets, GitHub Pages, and release checks for Normal and Zen. Android release builds require a real upload key and fail clearly when signing configuration is missing. Credentials, keystores, and local release files are ignored by Git.
 
 Every push to `main` runs format, analysis, and tests, then builds and deploys the game to GitHub Pages. Pull requests run the checks without deploying. The separate Android workflow can build a signed App Bundle when release secrets are configured; it does not automatically submit to Google Play.
 
