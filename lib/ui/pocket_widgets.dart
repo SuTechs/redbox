@@ -278,26 +278,35 @@ class HomeIllustration extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
     height: height,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        const SquareMascot(),
-        Positioned(
-          left: 27,
-          top: 38,
-          child: _FloatingSquare(size: 28, angle: .25),
-        ),
-        Positioned(
-          right: 16,
-          bottom: 32,
-          child: _FloatingSquare(size: 38, angle: -.24),
-        ),
-        Positioned(
-          left: 56,
-          bottom: 20,
-          child: _FloatingSquare(size: 17, angle: -.12),
-        ),
-      ],
+    child: LayoutBuilder(
+      builder: (context, bounds) {
+        if (bounds.maxWidth < 180 || height < 140) {
+          return Center(
+            child: SquareMascot(size: math.min(bounds.maxWidth, height) * .72),
+          );
+        }
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            const SquareMascot(),
+            const Positioned(
+              left: 27,
+              top: 38,
+              child: _FloatingSquare(size: 28, angle: .25),
+            ),
+            const Positioned(
+              right: 16,
+              bottom: 32,
+              child: _FloatingSquare(size: 38, angle: -.24),
+            ),
+            const Positioned(
+              left: 56,
+              bottom: 20,
+              child: _FloatingSquare(size: 17, angle: -.12),
+            ),
+          ],
+        );
+      },
     ),
   );
 }

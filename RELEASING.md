@@ -1,17 +1,19 @@
 # Releasing Red Box
 
-Source version: **1.1.0+2**. Android application ID and iOS bundle ID: **com.sutechs.redbox**. Support: **redbox@sutechs.com**.
+Source version: **1.1.0+3**. Android application ID and iOS bundle ID: **com.sutechs.redbox**. Support: **redbox@sutechs.com**.
 
 ## Prepare version 1.1.0
 
-This version adds progressive Normal mode and adds random, level-free Zen with shaped silhouettes. The [difficulty plan](docs/plans/progression-redesign.md) records the curve, fairness rules, and completed build checks; [CHANGELOG.md](CHANGELOG.md) lists the player-facing changes. Store upload and publication remain separate release steps.
+This version adds progressive Normal mode and adds random, level-free Zen with shaped silhouettes. The [difficulty plan](docs/plans/progression-redesign.md) records the curve, fairness rules, and completed build checks; [CHANGELOG.md](CHANGELOG.md) lists the player-facing changes. The [1.1.0 release record](docs/releases/1.1.0.md) records signed artifacts, validation and store submission results. Store approval remains separate from submission.
 
 - Playtest Normal levels 1, 10, 50, 300, 600, and 1300 on physical Android and iOS devices: preview timing, visible swaps, locked input during movement, Extra time, and app/device reduced motion.
 - Upgrade an existing 1.0.0 installation and verify old casual progress is archived, Normal starts at 1, Zen has no level counter, and audio/comfort preferences survive.
 - Check pause/resume, backgrounding, rotation, and whole-board visibility on short screens and with larger text.
-- Refresh store descriptions, release notes, and screenshots before uploading. Existing listing copy and marketing captures describe the original game, now Zen; the new mode previews live in `docs/difficulty/`.
+- Store descriptions, release notes and six marketing screenshots for Android, iPhone and iPad have been refreshed for Normal and Zen. Additional mode previews live in `docs/difficulty/`.
 
-The store records below describe **1.0.0 (1)** as recorded on **October 3, 2026**. Recheck the consoles before another submission; these records do not establish current review or publication status.
+On **October 31, 2026**, **1.1.0 (3)** was uploaded and submitted to both stores with updated descriptions, release notes and marketing screenshots. App Store Connect shows **Waiting for Review**; Google Play shows **Changes in review** with automated checks running. Both retain automatic publication after approval. The existing Play internal tester list and TestFlight group also have build 3. See the [release record](docs/releases/1.1.0.md) for validation, checksums and console links.
+
+The historical 1.0.0 submission records below are dated October 3, 2026; version 1.0.0 was verified live on both stores before this update.
 
 ## Web and GitHub
 
