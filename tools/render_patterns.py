@@ -18,9 +18,10 @@ def font(family, size, weight):
     return face
 
 
-image = Image.new('RGB', (1120, 1320), CREAM)
+height = 142 + ((len(SAMPLES) + 2) // 3) * 369 + 85
+image = Image.new('RGB', (1120, height), CREAM)
 draw = ImageDraw.Draw(image)
-draw.text((32, 28), 'More shapes. Little moments.', font=font('Fredoka', 39, 500), fill=INK)
+draw.text((32, 28), 'Small beginnings. A growing challenge.', font=font('Fredoka', 39, 500), fill=INK)
 draw.text((34, 86), 'Seed 20261002 · exact output from the game’s Dart pattern function', font=font('Nunito', 18, 600), fill=MUTED)
 for index, sample in enumerate(SAMPLES):
     left = 32 + index % 3 * 356
@@ -41,10 +42,10 @@ for index, sample in enumerate(SAMPLES):
                 continue
             x, y = x0 + col * (size + gap), y0 + row * (size + gap)
             red = box_id in sample['redIds']
-            draw.rounded_rectangle((x, y + 5, x + size, y + size + 5), radius=9, fill=RED_DEPTH if red else DEPTH)
-            draw.rounded_rectangle((x, y, x + size, y + size), radius=9, fill=RED if red else TILE)
+            draw.rounded_rectangle((x, y + 5, x + size, y + size + 5), radius=min(9, size * .22), fill=RED_DEPTH if red else DEPTH)
+            draw.rounded_rectangle((x, y, x + size, y + size), radius=min(9, size * .22), fill=RED if red else TILE)
             box_id += 1
     draw.text((left + 20, top + 289), sample['name'], font=font('Fredoka', 25, 500), fill=INK)
     draw.text((left + 20, top + 323), f"{sample['boxes']} boxes · {sample['boxes'] - sample['redCount']} satisfying taps", font=font('Nunito', 15, 600), fill=MUTED)
-draw.text((32, 1268), 'Remember the red boxes, then enjoy tapping all the others. No rush.', font=font('Nunito', 19, 600), fill=MUTED)
+draw.text((32, height - 55), 'Remember the red boxes, then enjoy tapping all the others. No rush.', font=font('Nunito', 19, 600), fill=MUTED)
 image.save(ROOT / 'design/pattern-samples.png')

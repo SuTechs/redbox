@@ -77,18 +77,29 @@ void main() {
       ..reducedMotion = true
       ..haptics = false;
     final frame = GlobalKey();
-    await tester.pumpWidget(
-      RepaintBoundary(
-        key: frame,
-        child: RedBoxApp(
-          settings: settings,
-          sounds: QuietSounds(),
-          musicPlayback: QuietMusic(),
-          generator: RoundGenerator(random: Random(42)),
+    Future<void> mount({int seed = 42}) async {
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: frame,
+          child: RedBoxApp(
+            settings: settings,
+            sounds: QuietSounds(),
+            musicPlayback: QuietMusic(),
+            generator: RoundGenerator(random: Random(seed)),
+          ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> tap(Finder finder) async {
+      await tester.ensureVisible(finder);
+      await tester.tap(finder);
+      await tester.pump();
+      await tester.pump();
+    }
+
+    await mount();
     Future<void> save(String name) async {
       await tester.pump();
       final boundary =
@@ -109,12 +120,24 @@ void main() {
     }
 
     await save('01-home');
-    await tester.tap(find.byKey(const ValueKey('browse-levels')));
+    await tap(find.byKey(const ValueKey('browse-levels')));
     await tester.pumpAndSettle();
     await save('02-levels');
-    await tester.tap(find.byKey(const ValueKey('level-3')));
-    await tester.pump();
+    await tester.pumpWidget(const SizedBox());
+
+    // A real late Normal board demonstrates the new memory challenge.
+    settings.level = 500;
+    await mount();
+    await tap(find.byKey(const ValueKey('play')));
+    await tester.pump(const Duration(milliseconds: 240));
     await save('03-remember');
+    await tester.pumpWidget(const SizedBox());
+
+    // Seed 166 begins with the actual heart silhouette. No UI is reconstructed.
+    settings.level = 14;
+    await mount(seed: 166);
+    await tap(find.byKey(const ValueKey('play-zen')));
+    await tester.pump(const Duration(milliseconds: 240));
     final red = tester
         .widgetList<PocketTile>(find.byType(PocketTile))
         .where((tile) => tile.red)
@@ -126,22 +149,17 @@ void main() {
         .where((id) => !red.contains(id))
         .toList();
     await tester.pump(const Duration(seconds: 3));
-    await tester.pump();
     for (final id in safe.take(3)) {
-      await tester.tap(find.byKey(ValueKey('box-$id')));
-      await tester.pump();
+      await tap(find.byKey(ValueKey('box-$id')));
     }
     await save('04-tap');
     for (final id in safe.skip(3)) {
-      await tester.tap(find.byKey(ValueKey('box-$id')));
-      await tester.pump();
+      await tap(find.byKey(ValueKey('box-$id')));
     }
     await save('05-lovely');
-    await tester.tap(find.byTooltip('Back to levels'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Return home'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.pumpWidget(const SizedBox());
+    await mount();
+    await tap(find.byTooltip('Settings'));
     await tester.pumpAndSettle();
     await save('06-music');
     await tester.pumpWidget(const SizedBox());

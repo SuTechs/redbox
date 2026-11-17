@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'music_track.dart';
+export '../game/play_mode.dart';
 
 abstract interface class SettingsStore {
   Future<Map<String, Object?>> read();
@@ -42,7 +43,12 @@ class AppSettings extends ChangeNotifier {
   AppSettings({required this.store});
 
   final SettingsStore store;
-  int level = 1;
+  int normalLevel = 1;
+  // Retain old progress as inert migration data; Zen has no ladder anymore.
+  int legacyZenLevel = 1;
+  int get level => normalLevel;
+  set level(int value) => normalLevel = value;
+
   bool sound = true;
   bool musicEnabled = true;
   MusicTrack musicTrack = MusicTrack.cloudDrift;
@@ -58,8 +64,10 @@ class AppSettings extends ChangeNotifier {
   Future<void> load() async {
     try {
       final values = await store.read();
-      final savedLevel = values['level'];
-      if (savedLevel is int && savedLevel > 0) level = savedLevel;
+      int validLevel(Object? value) => value is int && value > 0 ? value : 1;
+      // v1 progress belongs to the unchanged Zen game, never to Normal.
+      legacyZenLevel = validLevel(values['zenLevel'] ?? values['level']);
+      normalLevel = validLevel(values['normalLevel']);
       sound = values['sound'] is bool ? values['sound'] as bool : true;
       musicEnabled = values['musicEnabled'] is bool
           ? values['musicEnabled'] as bool
@@ -101,15 +109,18 @@ class AppSettings extends ChangeNotifier {
   }
 
   void unlock(int nextLevel) {
-    if (nextLevel <= level) return;
-    level = nextLevel;
+    if (nextLevel <= normalLevel) return;
+    normalLevel = nextLevel;
     _persist();
     notifyListeners();
   }
 
   void _persist() {
     final snapshot = <String, Object?>{
-      'level': level,
+      'level':
+          legacyZenLevel, // Keep legacy readers on their original Zen progress.
+      'zenLevel': legacyZenLevel,
+      'normalLevel': normalLevel,
       'sound': sound,
       'musicEnabled': musicEnabled,
       'musicTrack': musicTrack.name,

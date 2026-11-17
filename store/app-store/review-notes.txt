@@ -1,1 +1,7 @@
-Red Box is a fully offline single-player memory puzzle. No sign-in, ads, purchases, tracking, or server access is required. Start a level, remember the boxes that briefly turn red, and tap every other box after the preview ends. Correct taps also become red. There is no time limit during tapping. Earlier unlocked levels can be replayed from Levels; red positions randomize on each attempt. Settings includes music selection, separate audio controls, reduced motion, symbol cues, and the full in-app privacy notice. All music is original and bundled.
+Red Box is an offline, single-player memory puzzle. No login, ads, purchases, tracking or server access is required. All music and game assets are bundled.
+
+Version 1.1.0 adds two explicit entry points:
+1. Continue / Let's play opens Normal. Remember the red boxes, wait for them to fade and tap every safe box. Correct taps also turn red. Later levels add more remembered reds and visible pair swaps. Shuffles start at level 50. There is no timer during tapping. Levels can replay any unlocked Normal level.
+2. Zen mode, directly below Continue, starts random easy shaped boards with no levels, shuffles or difficulty ramp. Completion offers Another board. A mistaken tap offers Another look at the same board. Zen never alters Normal progress.
+
+Settings and pause offer separate sound/music controls, original music tracks, longer previews, reduced motion, symbol cues and an in-app privacy notice. Reduced motion disables shuffles. Rotation restarts a full preview while preserving the remembered tile identities. No special credentials or external hardware are needed.

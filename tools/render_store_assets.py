@@ -44,12 +44,12 @@ def wrapped(draw,text,x,y,max_width,face,color,line_height):
     return y
 
 slides=[
-    ('01-a-little-reset','01-home',['A tiny game.','A little reset.'],'Turn a spare moment into a gentle break.','Your own little pocket toy.','#FFF8ED'),
-    ('02-remember-and-tap','03-remember',['Remember the red.','Enjoy the rest.'],'One simple rule. So many satisfying taps.','Watch. Remember. Tap the others.','#FFF2EC'),
-    ('03-your-own-pace','04-tap',['No rush.','No pressure.'],'Tap at your own pace. Retry whenever you like.','No countdown while you tap.','#F5F5E9'),
-    ('04-endless-little-wins','02-levels',['Little wins.','Endless shapes.'],'A fresh pattern to explore, one level at a time.','Replay your favorites anytime.','#FFF8ED'),
+    ('01-a-little-reset','01-home',['Your next challenge.','Your little reset.'],'Grow your memory in Normal. Unwind in Zen mode.','Two ways to enjoy your pocket toy.','#FFF8ED'),
+    ('02-remember-and-tap','03-remember',['More to remember.','More to discover.'],'A growing memory challenge, with visible shuffles.','Remember the reds. Follow the boxes.','#FFF2EC'),
+    ('03-your-own-pace','04-tap',['Just tap.','Just unwind.'],'Beautiful random Zen boards. No levels. No hurry.','Your calm little corner.','#F5F5E9'),
+    ('04-endless-little-wins','02-levels',['Little steps.','Lasting little wins.'],'Replay any unlocked level. Keep your progress.','Fresh reds on each Normal retry.','#FFF8ED'),
     ('05-quiet-soundtrack','06-music',['Find your','quiet soundtrack.'],'Soft background music and little tap sounds.','Two calming tracks. Mute anytime.','#FFF2EC'),
-    ('06-one-more-smile','05-lovely',['One more box.','One more smile.'],'Gentle progress, cute shapes, and a moment for you.','A little focus. A softer moment.','#F5F5E9'),
+    ('06-one-more-smile','05-lovely',['One more board.','One more smile.'],'A pocket full of shapes, ready when you are.','Offline. No ads. No account.','#F5F5E9'),
 ]
 logo=Image.open(ROOT/'assets/brand/logo.png').convert('RGBA')
 outputs=[]

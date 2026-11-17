@@ -3,6 +3,43 @@ import 'package:redbox/core/settings.dart';
 import 'package:redbox/core/music_track.dart';
 
 void main() {
+  test('Legacy Zen progress is archived without promoting a casual player to Normal', () async {
+    final store = MemorySettingsStore()
+      ..values = {
+        'level': 1296,
+        'mode': 'zen',
+        'sound': false,
+        'previewSeconds': 5,
+      };
+    final settings = AppSettings(store: store);
+    await settings.load();
+    expect(settings.level, 1);
+    expect(settings.legacyZenLevel, 1296);
+    expect(settings.sound, false);
+    settings.unlock(2);
+    await settings.saved;
+    expect(store.values.containsKey('mode'), false);
+    final restored = AppSettings(store: store);
+    await restored.load();
+    expect(restored.level, 2);
+    expect(restored.legacyZenLevel, 1296);
+    settings.dispose();
+    restored.dispose();
+  });
+  test(
+    'Existing Normal unlocks survive the removal of the Zen ladder',
+    () async {
+      final store = MemorySettingsStore()
+        ..values = {'normalLevel': 600, 'zenLevel': 73, 'mode': 'zen'};
+      final settings = AppSettings(store: store);
+      await settings.load();
+      expect(settings.level, 600);
+      settings.unlock(2);
+      await settings.saved;
+      expect(settings.level, 600);
+      settings.dispose();
+    },
+  );
   test(
     'Progress and preferences persist and never roll back an unlocked level',
     () async {

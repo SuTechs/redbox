@@ -1,100 +1,69 @@
 # Red Box
 
-Status: Pocket toy design approved on 2 October 2026. The first Flutter version is implemented. See DESIGN.md and design/pocket-toy.html for the locked design guide.
+A tactile memory game in the approved Pocket toy style: warm cream, coral square
+boxes, friendly typography, original quiet sounds, and optional ambient music.
 
-## The idea
+## Normal
 
-Red Box is a cute, calming memory game for a small everyday break. Watch a few square boxes glow red, remember their positions, then tap every box that did **not** glow red.
+Continue resumes a numbered, seeded memory challenge. Start with four boxes and
+one red; the first ten total counts are 4, 5, 6, 6, 7, 7, 8, 8, 9, 10. Red counts
+rise to twelve at 500, eighteen at 1,300 and twenty at 2,000. Boards grow to forty
+boxes. Viewing time scales with memory load and shortens slightly within practice
+bands. Shuffling starts at 50, reaches four sequential pairs, and gradually
+speeds up from 900ms to 650ms per pair. The full policy and its review are in the
+[approved plan](docs/plans/progression-redesign.md).
 
-Correctly tapped boxes also turn red. That is the playful twist: the player remembers what happened earlier instead of relying on the colors currently on screen.
+Watch the reds, let them fade, follow any moving pairs, then tap every safe box.
+Correct taps also turn red. Tile identity carries remembered state through a
+swap. Input is locked during preview, fading and movement. Wrong taps offer a
+fresh attempt at the same level and shape, with fresh reds. Completion unlocks
+the next level. Replays never reduce the furthest unlock.
 
-## How a round works
+The curve caps at forty boxes and twenty reds; numbered play continues with fresh
+sets and varied seeded layouts. No lives, score, input timer or paywall.
 
-1. A beautiful arrangement of square boxes appears. The opening levels use 6, 8, 10, 12, and 9 boxes in different silhouettes.
-2. One or more boxes gently glow red for a few seconds. The first level shows one red box.
-3. Those boxes return to their normal appearance. Every box now looks the same.
-4. The player taps all the boxes that stayed normal during the preview, in any order.
-5. Each correct tap turns that box red and gives a soft, satisfying response.
-6. When every safe box has been tapped, the round is complete. A small celebration leads to the next level.
+## Zen
 
-Example: if one box glows red in a six-box round, leave it alone and tap the other five. At the end, the five tapped boxes are red and the original red box is normal.
+Zen mode starts an independent, random easy board. Zen has no level numbers,
+chapters, progression, score or Settings toggle. Its curated shuffled shape deck
+contains connected petals, leaves, rings, ribbons, wings, arches and similar
+silhouettes. Solid rectangular and square boards are excluded. Families do not
+repeat consecutively. Shapes contain 6–16 boxes, remembering one red most of the
+time, occasionally two on boards of ten or more. Difficulty never increases.
 
-The red boxes are a set of positions to remember, not a sequence to repeat. All marked boxes glow together in the initial version.
+Preview for three seconds, or five with Extra time. No shuffles. Completion
+shows Lovely and Another board. A mistake softly reveals the reds and offers
+Another look at the same board, without a penalty. A New board action is also
+available in pause. Random Zen play never changes Normal progress.
 
-## Rules
+## Navigation and appearance
 
-- Taps are enabled only after the preview finishes and its red color has fully faded.
-- A box that glowed during the preview must never be tapped, even when it looks normal again.
-- A correctly selected box stays red and cannot count twice. Repeated taps on it do nothing.
-- The boxes keep the same positions throughout the round.
-- Winning means selecting every safe box, with no forbidden selections.
-- Every arrangement contains at least one forbidden box and at least one safe box.
-- Progress shows safe boxes selected, such as “2 of 3”. It does not reveal which boxes are safe.
+Home: primary Continue (Let's play for a new player), then Zen mode. Settings is
+at the top right, with the less prominent Levels icon directly below. The level
+browser is Normal-only: chapter guidance and numbered completed/current/locked
+buttons, with no pattern thumbnails or per-cell red counts. A level picker can
+replay any unlocked number. Gameplay and level browsing retain the Pocket toy
+palette; Zen adds a sage lotus and Zen label.
 
-## Keeping it relaxing
+Regular phones keep spacious tactile boards. Dense boards, short viewports,
+landscape and large text use a board-first arrangement. All active tiles remain
+square and at least 48 logical pixels; timed boards are fully visible. Landscape
+uses a fitted shape variant and side controls. Rotation restarts the same
+remembered identities with a full preview; no hidden reflow while input is live.
 
-Defaults for the first version:
+## Comfort and persistence
 
-- No timer during the tapping phase, lives, streak pressure, or score penalties.
-- A mistake pauses the round, gently reveals the remembered boxes, and says “Let's try that again”. Retry starts a fresh random pattern at the same level, without losing progress.
-- Start with a three-second preview. Offer a slower five-second preview in settings.
-- Let the player pause, resume, or leave whenever they like. Resuming or returning from the background replays the preview and clears that round's selections.
-- Use soft optional sounds and light optional haptics. Avoid loud alarms, rapid flashes, and screen shakes.
-- Make success feel like a small reward: a friendly phrase, a little bounce, and a clear “Next level” button.
+Music offers Cloud drift and Warm keys, with separate sound/music controls, a
+track picker and Mute all audio. Bundle original sounds and fonts. Pause music
+when backgrounded; pause/resume replays the same round. Extra time, optional
+haptics, symbol cues and reduced motion remain available. Reduced motion removes
+swaps instead of concealing a teleport. Pause preserves completed and retry states.
 
-“Stress relief” describes the intended mood and experience; the game does not make health claims.
+Persist Normal's furthest level and audio/comfort choices. Retain old Zen/legacy
+level values as inert migration data, without showing a Zen ladder or using them
+to unlock Normal. Normal unlocks survive the update.
 
-## Levels and arrangements
-
-The pleasure comes from tapping the boxes. Easy means a small memory load, not a small or repetitive board. Beautiful patterns with 6–16 square boxes appear from the beginning, independently of the red-box count.
-
-`patternForLevel(level, seed: seed)` is a pure Dart function. The same seed and level always return the same shape. It selects from 22 connected silhouettes, alternates box counts, and varies reflections and rotations. Families include leaves, stepping stones, clovers, rings, wings, crowns, ribbons, and frames. Consecutive levels use different families. Boards use at most five rows/columns, preserve square tiles, and fit the screen with touch targets of at least 48 logical pixels.
-
-| Levels | Boxes | Red boxes to remember |
-| --- | --- | --- |
-| 1–50 | Varied 6–16 | 1 |
-| 51–150 | Varied 6–16 | 1–2 |
-| 151 onward | Varied 6–16 | 1–3 |
-
-One easy moment in each five-level block after 50 reduces the red-box count to one; it keeps the seeded silhouette and plenty of satisfying taps. At later levels, the other rounds mix two and three red boxes. There is no escalating board-size pressure.
-
-Shapes are deterministic; red positions are chosen separately at random for each attempt. A retry keeps the level's shape and changes its red set. The pattern sampler in `design/patterns.html` and `design/pattern-samples.png` shows exact seed-20261002 outputs for levels 1, 2, 3, 4, 5, 50, 70, 100, and 1000. Regenerate it with `dart run tools/preview_patterns.dart 20261002`.
-
-Levels continue indefinitely: no final level, reset at a level cap, or wraparound. After the early progression, vary comfortable layouts and red-box counts without continually increasing difficulty. Every fresh round chooses red boxes at random, including level 1. Avoid repeating the same red set on recent retries/replays; pause/resume preserves the current pattern.
-
-The level page shows 50 levels per chapter with friendly pace labels, completed/open/locked square buttons, chapter navigation, and a number picker for reaching any unlocked level. Completing an earlier level never lowers saved progress. The furthest unlocked level remains the home Continue destination.
-
-## Screens and UI
-
-- **Home:** Red Box name, a friendly red square character, one clear play button, and small How to play and Settings actions. Offer Continue when a saved level exists.
-- **Levels:** a Pocket toy chapter browser, square level buttons, difficulty labels, and replay access to every unlocked level.
-- **How to play:** a short visual explanation: watch the red boxes → let them fade → tap the others. Explain that correct taps turn red too.
-- **Game:** level number, pause control, generous space around the boxes, a clear “Watch” / “Tap the others” instruction, and subtle progress.
-- **Round complete:** warm feedback and a Next level button. Keep the board visible where possible.
-- **Retry:** kind feedback, remembered boxes revealed, and a Try again button.
-- **Pause / Settings:** resume, return home, sound, haptics, slower preview, and reduced motion. No navigation underneath active boxes.
-
-## Look and feel
-
-Cute, simple, tactile, and uncluttered. Red is the central gameplay color; other colors should support it. Rounded square corners are welcome, but the boxes stay visibly square. Give the mascot personality while keeping gameplay tiles simple and equally recognizable.
-
-The approved direction is **Pocket toy**: warm cream, coral red, soft depth, Fredoka titles, Nunito body text, and a friendly square mascot. Preserve the approved HTML guide in the Flutter project.
-
-Bundle relaxing sounds for correct taps, level completion, play/continue/next/retry, and mistakes. Use gentle plucks and rounded chimes, with a separate mute setting. Mistakes get a soft low note rather than an alarm.
-
-Background music offers two original, bundled ambient loops: Cloud drift and Warm keys. Start music on the player's first interaction, keep it quiet beneath tap sounds, fade track changes, and pause when backgrounded. Save the selected track and separate music/tap-sound mute preferences. Include a Mute all audio action and access to music settings from the pause sheet. All audio must work offline.
-
-Accessibility: comfortable text contrast, touch targets of at least 48 logical pixels, phase announcements, and a reduced-motion preview that holds red without pulsing. Offer a non-color cue, such as the same symbol on previewed and correctly selected boxes, so the memory challenge remains intact. Audio is optional and must not be necessary to understand the game.
-
-## First Flutter version
-
-Build for Android and iOS, portrait-first and offline. Include the core loop, gentle progression, curated layouts, tutorial, pause, retry, settings, and local storage for the current level and preferences. Exclude accounts, ads, purchases, leaderboards, and online features from the first version.
-
-Keep the originally red box IDs separate from the tapped box IDs. Determine correctness from the original set, never from a tile's visible color. Use explicit round states: ready → preview → fade → input → complete or retry.
-
-## Delivery order
-
-1. Save and lock the approved Pocket toy design guide. Complete.
-2. Implement the full Flutter UI, randomized endless rounds, and relaxing sound cues.
-3. Verify the rules, lifecycle behavior, local progress, responsive layouts, and build.
-4. Playtest the pace, sound balance, and difficulty on a phone.
+No accounts, ads, analytics, tracking, in-app purchases or data collection.
+Native apps work offline; the web version loads bundled assets over the network.
+Package/bundle ID: com.sutechs.redbox. Support: redbox@sutechs.com.
+Privacy: https://sutechs.com/privacy. Terms: https://sutechs.com/terms.

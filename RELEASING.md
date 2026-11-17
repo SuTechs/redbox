@@ -1,6 +1,19 @@
 # Releasing Red Box
 
-Version: **1.0.0+1**. Android application ID and iOS bundle ID: **com.sutechs.redbox**. Support: **redbox@sutechs.com**.
+Source version: **1.1.0+3**. Android application ID and iOS bundle ID: **com.sutechs.redbox**. Support: **redbox@sutechs.com**.
+
+## Prepare version 1.1.0
+
+This version adds progressive Normal mode and adds random, level-free Zen with shaped silhouettes. The [difficulty plan](docs/plans/progression-redesign.md) records the curve, fairness rules, and completed build checks; [CHANGELOG.md](CHANGELOG.md) lists the player-facing changes. The [1.1.0 release record](docs/releases/1.1.0.md) records signed artifacts, validation and store submission results. Store approval remains separate from submission.
+
+- Playtest Normal levels 1, 10, 50, 300, 600, and 1300 on physical Android and iOS devices: preview timing, visible swaps, locked input during movement, Extra time, and app/device reduced motion.
+- Upgrade an existing 1.0.0 installation and verify old casual progress is archived, Normal starts at 1, Zen has no level counter, and audio/comfort preferences survive.
+- Check pause/resume, backgrounding, rotation, and whole-board visibility on short screens and with larger text.
+- Store descriptions, release notes and six marketing screenshots for Android, iPhone and iPad have been refreshed for Normal and Zen. Additional mode previews live in `docs/difficulty/`.
+
+On **October 31, 2026**, **1.1.0 (3)** was uploaded and submitted to both stores with updated descriptions, release notes and marketing screenshots. App Store Connect shows **Waiting for Review**; Google Play shows **Changes in review** with automated checks running. Both retain automatic publication after approval. The existing Play internal tester list and TestFlight group also have build 3. See the [release record](docs/releases/1.1.0.md) for validation, checksums and console links.
+
+The historical 1.0.0 submission records below are dated October 3, 2026; version 1.0.0 was verified live on both stores before this update.
 
 ## Web and GitHub
 
@@ -55,15 +68,15 @@ Suggested category: **Game → Puzzle**. The current build has no advertisements
 
 The Play Console app record and English listing are created. The icon, feature graphic, and six marketing screenshots are uploaded in filename order and declared as created or edited using AI. Privacy, unrestricted app access, no ads, all age groups, content ratings, no data collection/sharing, no advertising ID, and the government/financial/health declarations are saved. IARC assigned Everyone in North America and PEGI 3 in Europe.
 
-Version **1.0.0 (1)** is available to the existing six-person **Sutechs Alpha Testers** list on the active internal-testing track. The bundle is accepted with API 24+ support and target SDK 36.
+Version **1.0.0 (1)** was made available to the existing six-person **Sutechs Alpha Testers** list on the internal-testing track. The bundle was accepted with API 24+ support and target SDK 36.
 
-On **October 3, 2026**, the same bundle, listing, and declarations were submitted for a full production rollout. Play Console shows **Changes in review**, with automated checks running before review. Managed publishing is off, so approved changes publish automatically. Availability targets 175 countries/regions plus Rest of World, excluding China and Vietnam. Store approval is not guaranteed by a successful local build, and the production app is not publicly launched yet.
+On **October 3, 2026**, the same bundle, listing, and declarations were submitted for a full production rollout. Play Console showed **Changes in review**, with automated checks running before review. Managed publishing was off, allowing approved changes to publish automatically. Availability targeted 175 countries/regions plus Rest of World, excluding China and Vietnam. Store approval is not guaranteed by a successful local build; production was not yet publicly launched at that submission.
 
 The Android build targets API **36** and supports API **24+**. Google requires API 36 for new phone app submissions from August 31, 2026. New personal accounts created after November 13, 2023 may need a closed test with 12 opted-in testers for 14 continuous days before applying for production access. Verify the account’s own dashboard requirements.
 
 Official references: [target API requirements](https://support.google.com/googleplay/android-developer/answer/11926878?hl=en), [preview asset specifications](https://support.google.com/googleplay/android-developer/answer/9866151), [testing requirements](https://support.google.com/googleplay/android-developer/answer/14151465?hl=en), [16 KB page-size support](https://developer.android.com/guide/practices/page-sizes).
 
-## App Store — submitted for review
+## App Store
 
 The iOS app record is created as **Red Box: A Little Reset** with SKU `sutechs-redbox-ios`. The English description, subtitle, promotional text, keywords, support/marketing URLs, review instructions, and private review contact are saved in App Store Connect. The app is categorized as Games → Puzzle / Casual, rated 4+, and uses Apple's standard EULA. App Privacy is published as **Data Not Collected**, with the canonical SuTechs privacy URL. The app is free and uses automatic release after approval.
 
@@ -71,9 +84,9 @@ Six iPhone screenshots at **1320×2868** and six iPad screenshots at **2064×275
 
 The signed archive exported successfully, and **1.0.0 (1)** was uploaded, processed, and attached to the App Store version. The local IPA is `build/ios/ipa/redbox.ipa`. Signing/export/upload logs and account-specific export options stay in ignored `release-private/`. Team selection is supplied locally rather than committed to the Xcode project. The app includes local-font notices and the shared-preferences required-API privacy manifest.
 
-On **October 3, 2026**, version **1.0.0 (1)** was submitted to App Review and shows **Waiting for Review**. The **Red Box Testers** internal TestFlight group contains the build with status **Testing**, and the existing eligible App Store Connect user has been invited. New builds are added to the group manually.
+On **October 3, 2026**, version **1.0.0 (1)** was submitted to App Review and showed **Waiting for Review**. The **Red Box Testers** internal TestFlight group contained the build with status **Testing**, and the existing eligible App Store Connect user had been invited. New builds are added to the group manually.
 
-Launch availability is set for **173 regions**, excluding mainland China and Vietnam pending the required game licensing documents. Apple's [regional requirements](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information) describe those documents. Neither native store is publicly launched yet.
+The v1 launch availability was set for **173 regions**, excluding mainland China and Vietnam pending the required game licensing documents. Apple's [regional requirements](https://developer.apple.com/help/app-store-connect/reference/app-information/app-information) describe those documents. Neither native store was publicly launched at the October 3 submission.
 
 ## Regenerate the visuals
 
@@ -88,6 +101,11 @@ flutter test tools/capture_screenshots_test.dart --dart-define=SCREENSHOT_DEVICE
 python3 tools/render_store_assets.py --device iphone
 flutter test tools/capture_screenshots_test.dart --dart-define=SCREENSHOT_DEVICE=ipad
 python3 tools/render_store_assets.py --device ipad
+# Normal / Zen previews and a timed shuffle GIF for review:
+flutter test tools/capture_difficulty_test.dart
+python3 tools/render_difficulty_gif.py
 ```
 
-Brand source and the image-generation prompt are in `assets/brand/`. Design reference and gameplay specification remain in `DESIGN.md` and `product.md`.
+The store capture test uses Normal sample progress. The difficulty capture test uses sample progress in memory, exports nine real Flutter PNGs under `docs/difficulty/`, and saves timed frames under ignored `release-private/difficulty-frames/`; the GIF exporter writes `docs/difficulty/shuffle.gif`. Neither capture changes player data.
+
+Brand source and the image-generation prompt are in [assets/brand/README.md](assets/brand/README.md). Design reference and gameplay specification remain in [DESIGN.md](DESIGN.md) and [product.md](product.md).

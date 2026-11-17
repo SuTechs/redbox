@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'round.dart';
 
-enum RoundPhase { preview, fade, input, complete, retry, paused }
+enum RoundPhase { preview, fade, shuffle, input, complete, retry, paused }
 
 enum TapResult { ignored, correct, complete, wrong }
 
@@ -18,23 +18,45 @@ class GameController extends ChangeNotifier {
   final Set<int> _selected = {};
   Timer? _timer;
   bool _disposed = false;
+  bool _reducedMotion = false;
+  int shuffleStep = 0;
+  Map<int, int> _positions = {};
+  Map<int, int> _previousPositions = {};
+  Duration get swapDuration => round.swapDuration;
+  static const swapSettle = Duration(milliseconds: 180);
+  Map<int, int> get positions => Map.unmodifiable(_positions);
+  Map<int, int> get previousPositions => Map.unmodifiable(_previousPositions);
+  bool get willShuffle => !_reducedMotion && round.swaps.isNotEmpty;
 
   Set<int> get selectedIds => Set.unmodifiable(_selected);
   int get selectedCount => _selected.length;
 
   void start(
     int level, {
-    required Duration preview,
+    Duration? preview,
+    int previewSeconds = 3,
+    PlayMode mode = PlayMode.normal,
+    LayoutProfile profile = LayoutProfile.portrait,
     bool reducedMotion = false,
   }) {
-    round = generator.generate(level);
-    replay(preview: preview, reducedMotion: reducedMotion);
+    round = generator.generate(level, mode: mode, profile: profile);
+    replay(
+      preview: preview ?? round.previewDuration(seconds: previewSeconds),
+      reducedMotion: reducedMotion,
+    );
   }
 
   void replay({required Duration preview, bool reducedMotion = false}) {
     _timer?.cancel();
     _selected.clear();
     _beforePause = null;
+    _reducedMotion = reducedMotion;
+    shuffleStep = 0;
+    _positions = {
+      for (var slot = 0; slot < round.layout.slots.length; slot++)
+        if (round.layout.slots[slot] case final int id) id: slot,
+    };
+    _previousPositions = Map.of(_positions);
     phase = RoundPhase.preview;
     notifyListeners();
     _timer = Timer(preview, () {
@@ -45,15 +67,65 @@ class GameController extends ChangeNotifier {
         reducedMotion ? Duration.zero : const Duration(milliseconds: 280),
         () {
           if (_disposed) return;
-          phase = RoundPhase.input;
-          notifyListeners();
+          _advanceShuffle();
         },
       );
     });
   }
 
   void retry({required Duration preview, bool reducedMotion = false}) {
-    start(round.level, preview: preview, reducedMotion: reducedMotion);
+    if (round.mode == PlayMode.zen) {
+      replay(preview: preview, reducedMotion: reducedMotion);
+      return;
+    }
+    start(
+      round.level,
+      mode: round.mode,
+      preview: preview,
+      profile: round.profile,
+      reducedMotion: reducedMotion,
+    );
+  }
+
+  void fit(
+    LayoutProfile profile, {
+    required Duration preview,
+    bool reducedMotion = false,
+  }) {
+    if (round.profile == profile) return;
+    round = generator.fit(round, profile);
+    if ([
+      RoundPhase.complete,
+      RoundPhase.retry,
+      RoundPhase.paused,
+    ].contains(phase)) {
+      _positions = {
+        for (var i = 0; i < round.layout.slots.length; i++)
+          if (round.layout.slots[i] case final int id) id: i,
+      };
+      _previousPositions = Map.of(_positions);
+      notifyListeners();
+    } else {
+      replay(preview: preview, reducedMotion: reducedMotion);
+    }
+  }
+
+  void _advanceShuffle() {
+    if (_disposed) return;
+    if (!willShuffle || shuffleStep >= round.swaps.length) {
+      phase = RoundPhase.input;
+      notifyListeners();
+      return;
+    }
+    _previousPositions = Map.of(_positions);
+    final (first, second) = round.swaps[shuffleStep];
+    final slot = _positions[first]!;
+    _positions[first] = _positions[second]!;
+    _positions[second] = slot;
+    shuffleStep++;
+    phase = RoundPhase.shuffle;
+    notifyListeners();
+    _timer = Timer(swapDuration + swapSettle, _advanceShuffle);
   }
 
   TapResult tap(int id) {

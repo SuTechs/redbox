@@ -23,13 +23,6 @@ void main() {
       expect(_connected(pattern), isTrue);
       expect(pattern.mask.first.contains('#'), isTrue);
       expect(pattern.mask.last.contains('#'), isTrue);
-      final round = RoundGenerator(
-        patternSeed: 20261002,
-        random: Random(level),
-      ).generate(level);
-      expect(round.layout.mask, pattern.mask);
-      expect(round.redIds.length, redBoxCountForLevel(level));
-      expect(round.safeCount, greaterThanOrEqualTo(3));
     });
   }
 
@@ -67,67 +60,6 @@ void main() {
       ),
     );
     expect(() => patternForLevel(0), throwsArgumentError);
-  });
-
-  test('Easy means few remembered boxes, with varied satisfying boards', () {
-    final shapes = <String>{};
-    final sizes = <int>{};
-    for (var level = 1; level <= 50; level++) {
-      final round = RoundGenerator(random: Random(level)).generate(level);
-      expect(round.pace, LevelPace.easy);
-      expect(round.redIds.length, 1);
-      shapes.add(round.layout.mask.join('/'));
-      sizes.add(round.layout.boxCount);
-    }
-    expect(shapes.length, greaterThan(20));
-    expect(sizes.length, greaterThan(5));
-    expect(sizes, containsAll([6, 8, 10, 12, 16]));
-    expect(redBoxCountForLevel(70), 2);
-    expect(redBoxCountForLevel(100), 2);
-    expect(redBoxCountForLevel(1000), 3);
-    expect(() => redBoxCountForLevel(0), throwsArgumentError);
-  });
-
-  test('Easy moments keep the seeded shape and only reduce memory load', () {
-    final generator = RoundGenerator();
-    for (final level in [54, 99, 199, 349, 399, 9999, 999999]) {
-      final round = generator.generate(level);
-      expect(round.isBreather, isTrue);
-      expect(round.redIds.length, 1);
-      expect(round.layout.mask, patternForLevel(level).mask);
-    }
-    for (var level = 1000; level < 1100; level++) {
-      final round = generator.generate(level);
-      expect(round.level, level);
-      expect(round.redIds.length, inInclusiveRange(1, 3));
-      expect(round.layout.boxCount, inInclusiveRange(6, 16));
-    }
-  });
-
-  test(
-    'Retries vary red positions while the seeded level pattern stays stable',
-    () {
-      final generator = RoundGenerator(random: Random(7));
-      for (final level in samples) {
-        var previous = generator.generate(level);
-        for (var attempt = 0; attempt < 100; attempt++) {
-          generator.generate(level + 1);
-          final fresh = generator.generate(level);
-          expect(fresh.redIds, isNot(previous.redIds));
-          expect(fresh.layout.mask, previous.layout.mask);
-          previous = fresh;
-        }
-      }
-    },
-  );
-
-  test('Every box can be chosen red; level 1 has no fixed red position', () {
-    final generator = RoundGenerator(random: Random(41));
-    final seen = <int>{};
-    for (var attempt = 0; attempt < 1000; attempt++) {
-      seen.add(generator.generate(1).redIds.single);
-    }
-    expect(seen, patternForLevel(1).slots.whereType<int>().toSet());
   });
 
   testWidgets(
